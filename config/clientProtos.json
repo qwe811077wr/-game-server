@@ -1,0 +1,55 @@
+{
+	"gate.gateHandler.queryEntry": {
+		"required string code": 1
+	},
+
+	"connector.entryHandler.enter": {
+		"required string code": 1,
+		"message UserInfo": {
+			"required string name": 1,
+			"required string avatarUrl": 2,
+			"required uInt32 gender": 3
+		},
+		"required UserInfo userInfo": 2,
+		"required string platform": 3
+	},
+
+	"connector.lobbyHandler.createRoom": {
+		"message RoomCfg": {
+			"required uInt32 playerCount": 1
+		},
+		"required RoomCfg roomCfg": 1
+	},
+
+	"connector.lobbyHandler.joinRoom": {
+		"required uInt32 roomid": 1
+	},
+
+	"connector.lobbyHandler.getMatchInfo": {
+		"required uInt32 gameType": 1
+	},
+
+	"connector.lobbyHandler.startMatch": {
+		"required uInt32 gameType": 1,
+		"required uInt32 stage": 2
+	},
+
+	"table.tableHandler.leaveRoom": {
+	},
+
+	"table.tableHandler.readyGame": {
+	},
+
+	"table.tableHandler.dissolveGame": {
+		"required uInt32 dissolveType": 1
+	},
+
+	"table.tableHandler.playCard": {
+		"repeated uInt32 bCardData": 1,
+		"required uInt32 bCardCount": 2
+	},
+
+	"table.tableHandler.autoCard": {
+		"required bool bAuto": 1
+	}
+}

@@ -1,0 +1,21 @@
+{
+	"development": {
+		"host": "127.0.0.1",
+		"port": "27017",
+		"database": "mango_test",
+		"options": {
+			"poolSize": 5
+		}
+	},
+	
+	"production": {
+		"host": "172.16.16.17",
+		"port": "27017",
+		"database": "mango_test",
+		"options": {
+			"user": "mongouser",
+			"pass": "mango!mango",
+			"poolSize": 5
+		}
+	}
+}

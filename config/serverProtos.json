@@ -1,0 +1,68 @@
+{
+	"onUserEntryRoom": {
+		"required uInt32 id": 1,
+		"required string name": 2,
+		"required uInt32 gender": 3,
+		"required string avatarUrl": 4,
+		"required uInt32 coins": 5,
+		"required uInt32 gems": 6,
+		"required uInt32 chairID": 7,
+		"required uInt32 dissolveState": 8,
+		"required uInt32 readyState": 9
+	},
+
+	"onLeaveRoom": {
+		"required uInt32 uid": 1
+	},
+
+	"onReadyGame": {
+		"required uInt32 wChairID": 1
+	},
+
+	"onStartGame": {
+		"required uInt32 wCurrentUser": 1,
+		"repeated uInt32 cbCardData": 2,
+		"required uInt32 wChairID": 3
+	},
+
+	"onDissolveRoom": {
+		"message DissolveInfo": {
+			"required uInt32 id": 1,
+			"required string name": 2,
+			"required uInt32 chairID": 3,
+			"required uInt32 dissolveState": 4
+		},
+		"repeated DissolveInfo dissolveData": 1,
+		"required uInt32 autoRemainTime": 2
+	},
+
+	"onWarnUser": {
+		"required uInt32 wWarnUser": 1
+	},
+
+	"onHandCardUser": {
+		"required uInt32 wChairID": 1,
+		"repeated uInt32 handCardData": 2
+	},
+
+	"onOutCard": {
+		"required uInt32 outcardUser": 1,
+		"repeated uInt32 cardData": 2,
+		"required uInt32 cardCount": 3,
+		"required sInt32 currentUser": 4
+	},
+
+	"onPassCard": {
+		"required uInt32 wPassUser": 1,
+		"required uInt32 wCurrentUser": 2
+	},
+
+	"onSettlement": {
+		"required uInt32 winUser": 1
+	},
+
+	"onAutoCard": {
+		"required uInt32 wAutoUser": 1,
+		"required bool bAuto": 2
+	}
+}

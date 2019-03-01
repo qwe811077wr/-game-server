@@ -1,0 +1,13 @@
+[
+	"onUserEntryRoom",
+	"onLeaveRoom",
+	"onReadyGame",
+	"onStartGame",
+	"onDissolveRoom",
+	"onWarnUser",
+	"onHandCardUser",
+	"onOutCard",
+	"onPassCard",
+	"onSettlement",
+	"onAutoCard"
+]

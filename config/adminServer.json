@@ -1,0 +1,26 @@
+[
+	{
+        "type": "gate",
+        "token": "agarxhqb98rpajloaxn34ga8xrunpagkjwlaw3ruxnpaagl29w4890"
+	},
+	{
+		"type": "connector",
+		"token": "agarxhqb98rpajloaxn34ga8xrunpagkjwlaw3ruxnpaagl29w4rxn"
+	},
+	{
+        "type": "auth",
+        "token": "agarxhqb98rpajloaxn34ga8xrunpagkjwlaw3ruxnpaagl29w4rxn"
+	},
+	{
+        "type": "centerGlobal",
+        "token": "agarxhqb98rpajloaxn34ga8xrunpagkjwlaw3ruxnpaagl29w4rxn"
+	},
+	{
+        "type": "matchGlobal",
+        "token": "agarxhqb98rpajloaxn34ga8xrunpagkjwlaw3ruxnpaagl29w6rxn"
+	},
+	{
+        "type": "table",
+        "token": "agarxhqb98rpajloaxn34ga8xrunpagkjwlaw3ruxnpaagl29w4rxn"
+    }
+]
