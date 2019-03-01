@@ -4,7 +4,7 @@
 			{"id": "gate-server-1", "host": "127.0.0.1", "clientPort": 3014, "frontend": true, "args": " --inspect=10001"}
 		],
 		"connector": [
-			{"id": "connector-server-1", "host": "127.0.0.1", "port": 5050, "clientHost": "47.99.50.101", "clientPort": 5000, "frontend": true, "args": " --inspect=10002"}
+			{"id": "connector-server-1", "host": "127.0.0.1", "port": 5050, "clientHost": "192.168.3.25", "clientPort": 5000, "frontend": true, "args": " --inspect=10002"}
 		],
 		"auth": [
 			{"id": "auth-server-1", "host": "127.0.0.1", "port": 5150, "args": " --inspect=10003"}
@@ -30,11 +30,14 @@
 		"auth": [
 			{"id": "auth-server-1", "host": "127.0.0.1", "port": 5150, "args": " --inspect=10003"}
 		],
-		"hall": [
-			{"id": "hall-server-1", "host": "127.0.0.1", "port": 5250, "args": " --inspect=10004"}
+		"centerGlobal": [
+			{"id": "centerGlobal-server", "host": "127.0.0.1", "port": 5250, "args": " --inspect=10004"}
 		],
-		"pdkgame": [
-			{"id": "pdkgame-server-1", "host": "127.0.0.1", "port": 5350, "args": " --inspect=10005"}
+		"matchGlobal": [
+			{"id": "matchGlobal-server", "host": "127.0.0.1", "port": 5350, "args": " --inspect=10005"}
+		],
+		"table": [
+			{"id": "table-server-1", "host": "127.0.0.1", "port": 5450, "args": " --inspect=10006"}
 		]
 	}
 }
