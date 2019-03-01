@@ -4,7 +4,7 @@
 			{"id": "gate-server-1", "host": "127.0.0.1", "clientPort": 3014, "frontend": true, "args": " --inspect=10001"}
 		],
 		"connector": [
-			{"id": "connector-server-1", "host": "127.0.0.1", "port": 5050, "clientHost": "192.168.3.25", "clientPort": 5000, "frontend": true, "args": " --inspect=10002"}
+			{"id": "connector-server-1", "host": "127.0.0.1", "port": 5050, "clientHost": "127.0.0.1", "clientPort": 5000, "frontend": true, "args": " --inspect=10002"}
 		],
 		"auth": [
 			{"id": "auth-server-1", "host": "127.0.0.1", "port": 5150, "args": " --inspect=10003"}

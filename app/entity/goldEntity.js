@@ -20,7 +20,7 @@ let GoldEntity = function (opts) {
 	this.gametype = opts.gametype;
 	this.stage = opts.stage;
 	this.team = opts.team;
-	this.autoinfo = [false, false, false];   // 托管信息
+	this.autoinfo = [0, 0, 0];   // 托管信息
 	this.autoSchedule = null; // 托管定时器
 	this.initGoldRoom();
 };
@@ -49,11 +49,11 @@ pro._startGame = function () {
 	let cardData = pdkHelper.RandCardList();
 
 	// 配牌
-	cardData = [
-		1, 45, 13, 60, 12, 10, 55, 23, 54, 37, 21, 52, 4, 19, 3,
-		29, 44, 43, 11, 58, 26, 57, 25, 40, 24, 22, 6, 53, 36, 35,
-		2, 28, 59, 27, 42, 41, 9, 56, 8, 39, 7, 38, 5, 20, 51,
-	];
+	// cardData = [
+	// 	1, 45, 13, 60, 12, 10, 55, 23, 54, 37, 21, 52, 4, 19, 3,
+	// 	29, 44, 43, 11, 58, 26, 57, 25, 40, 24, 22, 6, 53, 36, 35,
+	// 	2, 28, 59, 27, 42, 41, 9, 56, 8, 39, 7, 38, 5, 20, 51,
+	// ];
 
 	// 发牌、排序
 	var handCardData = [];
@@ -350,7 +350,7 @@ pro._broadcastAutoCardMsg = function (wAutoUser, bAuto) {
 	this._notifyMsgToOtherMem(null, route, msg);
 	
 	this.autoinfo[wAutoUser] = bAuto;
-	if (bAuto && wAutoUser == this.cardInfo.currentUser) {
+	if (bAuto == 1 && wAutoUser == this.cardInfo.currentUser) {
 		// 自动出牌
 		this.playCard();
 	}
@@ -383,17 +383,26 @@ pro._resetAutoSchedule = function (dt) {
 	let self = this;
 	dt = dt || 15;  // 默认15s自动托管
 	self._clearAutoSchedul();
-
+	
 	let wChairID = self.cardInfo.currentUser;
-	if (self.autoinfo[wChairID]) {
-		self.playCard();
-	} else {
-		self.autoSchedule = setInterval(function () {
-			self._clearAutoSchedul();
-			// 托管
-			self._broadcastAutoCardMsg(wChairID, 1);			
-		}, dt * 1000);
+	if (wChairID == consts.InvalUser) {
+		return;
 	}
+
+	// 已经托管不能直接调用playCard，要有延时(TODO:原因以后研究...)
+	if (self.autoinfo[wChairID] == 1) {
+		dt = 1;
+	}
+
+	self.autoSchedule = setInterval(function () {
+		if (self.autoinfo[wChairID] == 1) {
+			// 已经托管
+			self.playCard();
+		} else {
+			// 进入托管
+			self._broadcastAutoCardMsg(wChairID, 1);
+		}
+	}, dt * 1000);
 };
 
 // 托管定时器清除
