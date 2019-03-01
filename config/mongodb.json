@@ -9,12 +9,10 @@
 	},
 	
 	"production": {
-		"host": "172.16.16.17",
+		"host": "127.0.0.1",
 		"port": "27017",
 		"database": "mango_test",
 		"options": {
-			"user": "mongouser",
-			"pass": "mango!mango",
 			"poolSize": 5
 		}
 	}
