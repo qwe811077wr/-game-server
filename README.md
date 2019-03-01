@@ -27,6 +27,9 @@ nohup python -m SimpleHTTPServer 9999 &  后台运行(这个貌似有问题,待�
 1.pomelo启动环境选择与开启守护进程:pomelo start -e production [-D -d -t -i]
 (正式环境后面要加-D,设为守护进程，不然后台会被杀掉 pomelo start -e production -D)
 
+2.后台运行mongodb:(--fork开启守护进程)
+mongod --fork --dbpath=/usr/local/mongodb/data --logpath=/usr/local/mongodb/logs/mongodb2.log --logappend
+
 2.端口被占用操作
 Linux:
 1、CentOS: netstat -lnp|grep 端口  
