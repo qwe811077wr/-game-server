@@ -50,6 +50,6 @@
 	},
 
 	"table.tableHandler.autoCard": {
-		"required bool bAuto": 1
+		"required uInt32 bAuto": 1
 	}
 }

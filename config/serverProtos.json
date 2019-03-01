@@ -63,6 +63,6 @@
 
 	"onAutoCard": {
 		"required uInt32 wAutoUser": 1,
-		"required bool bAuto": 2
+		"required uInt32 bAuto": 2
 	}
 }

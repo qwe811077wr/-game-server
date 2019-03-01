@@ -3,6 +3,7 @@
  * Author: admin
  * Description:
  */
+let pomelo = require('pomelo');
 var entityManager = require('../../../services/entityManager');
 var logger = require('pomelo-logger').getLogger('game', __filename);
 var consts = require('../../../common/consts');
@@ -56,8 +57,10 @@ pro.onGoldStartGame = function (avtID, tableID, toServerID, cb) {
 // 金币场解散房间
 pro.onGoldDissolveGame = function (avtID, cb) {
 	var avatar = entityManager.getEntity(avtID);
-    avatar.removeSessionSetting("tableServer", true);
+	var sessionService = pomelo.app.get('sessionService');
+    var sessions = sessionService.getByUid(avatar.id);
+    if (sessions && sessions.length > 0) {
+		avatar.removeSessionSetting("tableServer", true);
+	}
     cb();
 };
-
-

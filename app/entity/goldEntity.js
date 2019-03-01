@@ -49,11 +49,11 @@ pro._startGame = function () {
 	let cardData = pdkHelper.RandCardList();
 
 	// 配牌
-	// cardData = [
-	// 	60, 44, 59, 11, 58, 57, 56, 8, 39, 7, 22, 6, 37, 52, 35,
-	// 	2, 45, 29, 28, 43, 10, 41, 25, 9, 40, 24, 38, 36, 20, 51,
-	// 	1, 13, 12, 27, 42, 26, 55, 23, 54, 53, 21, 5, 4, 19, 3,
-	// ];
+	cardData = [
+		1, 45, 13, 60, 12, 10, 55, 23, 54, 37, 21, 52, 4, 19, 3,
+		29, 44, 43, 11, 58, 26, 57, 25, 40, 24, 22, 6, 53, 36, 35,
+		2, 28, 59, 27, 42, 41, 9, 56, 8, 39, 7, 38, 5, 20, 51,
+	];
 
 	// 发牌、排序
 	var handCardData = [];
@@ -127,10 +127,17 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	} else {
 		// 托管AI出牌
 		wChairID = cardInfo.currentUser;
+		if (wChairID == cardInfo.turnUser) {
+			cardInfo.turnCardData = [];
+		}
 		let handCardData = cardInfo.handCardData[wChairID];
 		let turnCardData = cardInfo.turnCardData;
 		let bNextWarn = cardInfo.bUserWarn[(wChairID+1)%playerCount];
 		let outCard = pdkAIHelper.AISearchOutCard(handCardData, turnCardData, bNextWarn);
+		if (!outCard) {
+			// 要不起
+			return;
+		}
 		bCardData = outCard.bCardData;
 		bCardCount = outCard.bCardCount;
 	}
@@ -278,6 +285,10 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 
 // 推送玩家手牌消息
 pro._broadcastHandCardMsg = function (uid) {
+	if (!uid) {
+		return;
+	}
+
 	let wChairID = this._getChairIDByUid(uid);
 	let route = 'onHandCardUser';
 	let msg = {
@@ -380,7 +391,7 @@ pro._resetAutoSchedule = function (dt) {
 		self.autoSchedule = setInterval(function () {
 			self._clearAutoSchedul();
 			// 托管
-			self._broadcastAutoCardMsg(wChairID, true);			
+			self._broadcastAutoCardMsg(wChairID, 1);			
 		}, dt * 1000);
 	}
 };
