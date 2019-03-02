@@ -1,7 +1,6 @@
 ﻿
 【快速搭载http服务】
 python -m SimpleHTTPServer 9999
-nohup python -m SimpleHTTPServer 9999 &  后台运行(这个貌似有问题,待研究?)
 
 【调试】
 1.servers.json添加对应要调试的服务配置("args": " --inspect=5858",每个服务对应一个端口)
@@ -30,7 +29,10 @@ nohup python -m SimpleHTTPServer 9999 &  后台运行(这个貌似有问题,待�
 2.后台运行mongodb:(--fork开启守护进程)
 mongod --fork --dbpath=/usr/local/mongodb/data --logpath=/usr/local/mongodb/logs/mongodb2.log --logappend
 
-2.端口被占用操作
+3.后台运行:
+nohup xxx & (注意不能直接关闭shell窗口,要先exit命令退出)
+
+4.端口被占用操作
 Linux:
 1、CentOS: netstat -lnp|grep 端口  
 2、kill -9 pid
