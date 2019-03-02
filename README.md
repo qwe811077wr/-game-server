@@ -26,17 +26,21 @@ python -m SimpleHTTPServer 9999
 1.pomelo启动环境选择与开启守护进程:pomelo start -e production [-D -d -t -i]
 (正式环境后面要加-D,设为守护进程，不然后台会被杀掉 pomelo start -e production -D)
 
-2.后台运行mongodb:(--fork开启守护进程)
-mongod --fork --dbpath=/usr/local/mongodb/data --logpath=/usr/local/mongodb/logs/mongodb2.log --logappend
+2.后台运行mongodb:
+配置方式启动: mongod -f /usr/local/mongodb/mongodb.conf
+命令参数启动: mongod --fork --dbpath=/usr/local/mongodb/data --logpath=/usr/local/mongodb/logs/mongodb2.log --logappend
 
 3.后台运行:
 nohup xxx & (注意不能直接关闭shell窗口,要先exit命令退出)
 
 4.端口被占用操作
 Linux:
-1、CentOS: netstat -lnp|grep 端口  
-2、kill -9 pid
-Windows: 打开任务管理器,杀掉node.exe的进程
+1、通过端口获取pid: CentOS: netstat -lnp|grep 端口
+2、通过进程名获取pid: ps -ef | grep mongo
+3、kill -9 pid
+
+Windows: 
+打开任务管理器,杀掉node.exe的进程
 
 
 【问题集】
