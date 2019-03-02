@@ -100,9 +100,8 @@ module.exports = {
 	// 金币场code
 	MatchCode: {
 		OK: 0,
-		GAME_TYPE_FAIL: 1,  // 游戏类型错误
-		STAGE_TYPE_FAIL: 2, // 阶梯类型错误
-		EXIST_IN_GAME: 3, //已经在游戏中了
+		GAEM_TYPE_INVALID: 1,  // 游戏类型不存在
+		EXIST_IN_GAME: 2, 	//已经在游戏中了
 	},
 
 	// 游戏类型
