@@ -83,6 +83,7 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 		let roomInfo = resp.roomInfo;
 		roomInfo.toServerId = toServerId;
 		self._updateRoomInfo(gameType, stage, roomInfo);
+		self._enterRoomCtr(usrInfo, roomInfo);
 	});
 };
 
