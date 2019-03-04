@@ -101,21 +101,3 @@ pro._notifyJoinRoomToOtherMem = function (uid, players, route, msg) {
         messageService.pushMessageByUids(uids, route, msg);
     }
 };
-
-/* *************************  match begin  ************************* */
-
-// 获取金币场游戏大厅信息
-pro.getMatchInfo = function (gameType, next) {
-	pomelo.app.rpc.matchGlobal.matchRemote.getMatchInfo(null, gameType, function (resp) {
-		next(null, resp);
-	});
-};
-
-// 进入金币场
-pro.startMatch = function (gameType, stage, next) {
-	let usrInfo = this.entity.clientLoginInfo();
-	usrInfo.preSid = this.entity.serverId;
-	pomelo.app.rpc.matchGlobal.matchRemote.startMatch(null, gameType, stage, usrInfo, function (resp) {
-		next(null, resp);
-	});
-};

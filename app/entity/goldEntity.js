@@ -1,7 +1,7 @@
 /**
  * Date: 2019/2/21
  * Author: admin
- * Description: 金币场牌桌管理
+ * Description: 跑得快15张牌桌管理
  */
 let pomelo = require('pomelo');
 let util = require('util');
@@ -15,14 +15,9 @@ let pdkAIHelper = require('../helper/pdkAIHelper');
 let GoldEntity = function (opts) {
     opts = opts || {};
 	Entity.call(this, opts);
-
-	this.cardInfo = {};
-	this.gametype = opts.gametype;
-	this.stage = opts.stage;
-	this.team = opts.team;
-	this.autoinfo = [0, 0, 0];   // 托管信息
 	this.autoSchedule = null; // 托管定时器
-	this.initGoldRoom();
+	this.roomInfo = {};  // 房间信息
+	this.initGoldRoom(opts.usrInfo, opts.stage);
 };
 
 util.inherits(GoldEntity, Entity);
@@ -30,18 +25,72 @@ module.exports = GoldEntity;
 
 let pro = GoldEntity.prototype;
 
-pro.initGoldRoom = function () {
-    this.cardInfo = {
-        handCardData: [0, 0, 0],   	//手牌
-        cardCount: [0, 0, 0],      	//手牌数量
-        currentUser: 0,     		//当前出牌用户
-        turnCardCount: 0,   		//上回合出牌张数
-        turnCardData:[],    		//上回合出牌数据
-        turnUser: consts.InvalUser, 	//上回合用户
-        bUserWarn: [false, false, false] //是否报警
-    };
-	this._startGame();
+pro.initGoldRoom = function (usrInfo, stage) {
+    this.roomInfo = {
+        roomid: this.id,
+		creator: usrInfo.id,
+		createTime: Math.ceil(Date.now()/1000),
+		status: consts.TableStatus.INIT,
+		// autoinfo: [0, 0, 0],   // 托管信息
+		stage: stage,
+		players: [],
+		//游戏开始卡牌信息
+		cardInfo:{
+			handCardData: [0, 0, 0],   	//手牌
+			cardCount: [0, 0, 0],      	//手牌数量
+			currentUser: 0,     		//当前出牌用户
+			turnCardCount: 0,   		//上回合出牌张数
+			turnCardData:[],    		//上回合出牌数据
+			turnUser: consts.InvalUser, 	//上回合用户
+			bUserWarn: [false, false, false] //是否报警
+		},
+	};
+	this.addUserToPlayers(usrInfo, 0);
 };
+
+// 进入房间返回客户端数据
+pro.clientEnterInfo = function (uid) {
+	let wChairID = this._getChairIDByUid(uid)
+	let roomInfo = utils.clone(this.roomInfo);
+	roomInfo.cardInfo.handCardData = roomInfo.cardInfo.handCardData[wChairID];
+	return roomInfo;
+};
+
+pro._getChairIDByUid = function (uid) {
+	let players = this.roomInfo.players;
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
+		if (uid == user.id) {
+			return user.chairID;
+		}
+	}
+};
+
+pro.checkFullMember = function () {
+	if (this.roomInfo) {
+		if (this.roomInfo.players.length >= 3) {
+			return true;
+		}
+	}
+	return false;
+};
+
+pro.addUserToPlayers = function (usrInfo, chairID) {
+	let playerInfo = {
+		id: usrInfo.id,
+		name: usrInfo.name,
+		gender: usrInfo.gender,
+		avatarUrl: usrInfo.avatarUrl,
+		coins: usrInfo.coins,
+		gems: usrInfo.gems,
+		chairID: chairID,
+		readyState: consts.ReadyState.Ready_No,
+		autoState: consts.AutoState.AutoNo
+	};
+	this.roomInfo.players.push(playerInfo);
+};
+
+
 
 // 游戏开始
 pro._startGame = function () {

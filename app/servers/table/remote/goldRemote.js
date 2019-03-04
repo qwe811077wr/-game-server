@@ -11,11 +11,47 @@ var Remote = function (app) {
 
 var pro = Remote.prototype;
 
-pro.startGame = function (gametype, stage, team, cb) {
-    entityFactory.createEntity("GoldEntity", null, {
-		gametype: gametype,
-		stage: stage,
-		team: team
+pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
+	let goldEntity = entityManager.getEntity(usrInfo.goldRoomId);
+	if (!goldEntity) {
+		// 创建
+		if (gameType == consts.GameType.PDK_15) {
+			goldEntity = entityFactory.createEntity("GoldEntity", null, {
+				usrInfo: usrInfo,
+				stage: stage,
+			});
+		} else {
+			cb({code: consts.RoomCode.GAME_TYPE_INVALID});
+			return;
+		}
+	}
+
+	cb({
+		code: consts.RoomCode.OK,
+		roomInfo: goldEntity.clientEnterInfo(usrInfo.id)
 	});
-	cb();
+};
+
+pro.joinGoldRoom = function (roomid, usrInfo, cb) {
+	let resp = {};
+	let goldEntity = entityManager.getEntity(roomid);
+	if (goldEntity) {
+		if (usrInfo.goldRoomId === roomid) {
+			// 已经在房间里
+			resp["code"] = consts.RoomCode.OK;
+			resp["roomInfo"] = goldEntity.clientEnterInfo(usrInfo.id);
+		} else if (goldEntity.checkFullMember()) {
+			// 人数已满
+			resp["code"] = consts.RoomCode.FULL_PLAYER_ROOM;
+		} else {
+			// 加入
+			let chairID = goldEntity.roomInfo.players.length;
+			goldEntity.addUserToPlayers(usrInfo, chairID);
+			resp["code"] = consts.RoomCode.OK;
+			resp["roomInfo"] = goldEntity.clientEnterInfo(usrInfo.id);
+		}
+	} else {
+		resp["code"] = consts.RoomCode.NO_EXIST_ROOM;
+	}
+	cb(resp);
 };

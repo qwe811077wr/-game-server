@@ -14,7 +14,7 @@ var AUTO_SAVE_TICK = 1000 * 60 * 5  // 自动存盘时间
 var Avatar = function (opts) {
     opts = opts || {};
     // avatar组件
-    opts.components = ['avatarProp', 'lobby'];
+    opts.components = ['avatarProp', 'lobby', 'match'];
     Entity.call(this, opts);
 
     this.logoutTimer = null;
@@ -92,7 +92,8 @@ pro.clientLoginInfo = function () {
         avatarUrl: this.avatarUrl,
         coins: this.coins,
 		gems: this.gems,
-		roomid: this.roomid
+		roomid: this.roomid,
+		goldRoomId: this.goldRoomId,
     }
 };
 

@@ -10,7 +10,8 @@ var AvatarSchema = new Schema({
     avatarUrl: String,
     coins: Number,
     gems: Number,
-    roomid: Number,
+	roomid: Number,
+	goldRoomId: Number,
 });
 
 AvatarSchema.set('toObject', { getters: true });
