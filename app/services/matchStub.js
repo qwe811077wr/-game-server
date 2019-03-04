@@ -19,8 +19,9 @@ module.exports = function (app) {
 
 var MatchStub = function (app) {
 	this.app = app;
+	this.matchInfo = {};
 	this.robotList = {};
-	this.roomsInfo = {};
+	this.schedulList = {};
 	this._init();
 };
 
@@ -28,57 +29,48 @@ var pro  = MatchStub.prototype;
 
 pro._init = function () {
 	// pdk15 init
-	this.roomsInfo[consts.GameType.PDK_15] = {};
+	this.matchInfo[consts.GameType.PDK_15] = {};
 	this.robotList[consts.GameType.PDK_15] = {};
-	for (let i = 0; i < 3; i++) {
-		this.roomsInfo[consts.GameType.PDK_15][i] = {};
+	this.schedulList[consts.GameType.PDK_15] = {};
+	for (let i = 0; i < consts.PdkStageCount; i++) {
+		this.matchInfo[consts.GameType.PDK_15][i] = {};
 		this.robotList[consts.GameType.PDK_15][i] = [];
+		this.schedulList[consts.GameType.PDK_15][i] = setInterval(function () {
+			self._startMatchRobot(consts.GameType.PDK_15, i);
+		}, 1000 + i * 3000);
 	}
 };
 
-pro._checkRoom = function (gameType, stage) {
-	let gamelist = this.roomsInfo[gameType];
-	if (!gamelist) {
-		return false;
-	}
-
-	let stagelist = gamelist[stage];
-	if (!stagelist) {
-		return false;
-	}
-
-	return true;
+// 获取金币场大厅信息
+pro.getMatchInfo = function (gameType, cb) {
+	
 };
 
 // 进入房间
-pro.enterRoom = function (gameType, stage, usrInfo, cb) {
-	if (!this._checkRoom(gameType, stage)) {
-		cb({code: consts.MatchCode.GAEM_TYPE_INVALID});
-		return;
-	}
+pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
+	let self = this;
+	let goldRoomId = usrInfo.goldRoomId;
+	let roomInfo = this._findRoomInfo(gameType, stage, goldRoomId) || {};
+	let toServerId = roomInfo.toServerId;
+	if (!toServerId) {
+		// 如果是机器人
+		if (this._isRobot(usrInfo.openid)) {
+			this._addRobotToReadyList(gameType, stage, usrInfo);
+			cb({code: consts.MatchCode.OK});
+			return;
+		}
 
-	// 如果是机器人
-	if (this._isRobot(usrInfo.openid)) {
-		this._addRobotToReadyList(gameType, stage, usrInfo);
-		cb({code: consts.MatchCode.OK});
-		return;
-	}
-
-	if (false) {
-		// 已经在房间
-	} else {
-		// 有空位且房间内玩家已准备
-		
-
-		// 创建房间
 		let tables = pomelo.app.getServersByType('table');
 		let res = dispatcher.dispatch(usrInfo.id, tables);
-		pomelo.app.rpc.table.goldRemote.createRoom.toServer(res.id, usrInfo, function (resp) {
-			cb(resp);
-
-
-		});
+		toServerId = res.id;
 	}
+
+	pomelo.app.rpc.table.goldRemote.enterGoldRoom.toServer(toServerId, gameType, stage, usrInfo, function (resp) {
+		cb(resp);
+		let roomInfo = resp.roomInfo;
+		roomInfo.toServerId = toServerId;
+		self._updateRoomInfo(gameType, stage, roomInfo);
+	});
 };
 
 // 机器人添加进准备列表
@@ -88,6 +80,13 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 		robotArr.push(usrInfo);
 	}
 };
+
+// 获取一个机器人信息
+pro._getRobotInfo = function () {
+	
+};
+
+// 移除
 
 // 是否在数组中
 pro._isInArray = function (id, array) {
@@ -108,79 +107,51 @@ pro._isRobot = function (openid) {
 	return false;
 };
 
+// 更新房间信息
+pro._updateRoomInfo = function (gameType, stage, roomInfo) {
+	let list = this.matchInfo[gameType][stage];
+	list[roomInfo.roomid] = roomInfo;
+};
+
+// 移除房间信息
+pro._removeRoomInfo = function (gameType, stage, roomId) {
+	let list = this.matchInfo[gameType][stage];
+	delete list[roomId];
+};
+
+// 查找房间信息
+pro._findRoomInfo = function (gameType, stage, roomId) {
+	let list = this.matchInfo[gameType][stage];
+	let roomInfo = list[roomId];
+	return roomInfo;
+};
+
+// 开始匹配机器人
+pro._startMatchRobot = function (gameType, stage) {
+	let self = this;
+	let list = this.matchInfo[gameType][stage];
+	for (let i = 0; i < list.length; i++) {
+		const roomInfo = list[i];
+		if (roomInfo.players.length < 3) {
+			// 加入房间
+			let toServerId = roomInfo.toServerId;
+			let roomId = roomInfo.roomid;
+			let usrInfo = 
+			pomelo.app.rpc.table.goldRemote.joinGoldRoom.toServer(toServerId, roomId, usrInfo, function (resp) {
+				if (resp.code == consts.RoomCode.OK) {
+					let roomInfo = resp.roomInfo;
+					roomInfo.toServerId = toServerId;
+					self._updateRoomInfo(gameType, stage, roomInfo);
+				}
+			});
+		}
+	}
+};
+
 
 
 
 ///-----------------------------------------------------------------
-
-// 获取金币场大厅信息
-pro.getMatchInfo = function (gameType, cb) {
-	if (gameType == consts.GameType.PDK_15) {
-		let resp = {
-			code: consts.MatchCode.OK,
-			hallInfo: this._getPdk15Info()
-		}
-		cb(resp);
-	} else {
-		logger.warn('no exist playway type[%d]', gameType);
-		cb({code: consts.MatchCode.GAME_TYPE_FAIL});
-	}
-};
-
-pro._getPdk15Info = function () {
-	let hallInfo = [];
-	for (let i = 0; i < this.pdk15_info.length; i++) {
-		const info = this.pdk15_info[i];
-		let count = info.readyPlayers.length + info.robotPlayers.length + info.startTeams.length * 3;
-		hallInfo.push({
-			playerCount: count,
-		});
-	}
-	return hallInfo;
-};
-
-
-
-// 开始匹配 stage 0, 1, 2 ...对应选择阶梯
-pro.startMatch = function(gameType, stage, usrInfo, cb) {
-	// 是否已经在比赛中
-	if (this._isInTable(stage, usrInfo.id)) {
-		cb({code: consts.MatchCode.EXIST_IN_GAME});
-		return;
-	};
-
-	if (gameType == consts.GameType.PDK_15) {
-		let hallInfo = this.pdk15_info[stage];
-		if (hallInfo) {
-			cb({code: consts.MatchCode.OK});
-			// 加入分配列表
-			this._addReadyPlayer(gameType, stage, usrInfo);
-		} else {
-			logger.warn('no exist stage type[%d]', stage);
-			cb({code: consts.MatchCode.STAGE_TYPE_FAIL});
-		}
-	} else {
-		logger.warn('no exist playway type[%d]', gameType);
-		cb({code: consts.MatchCode.GAME_TYPE_FAIL});
-	}
-};
-
-// 添加准备玩家
-pro._addReadyPlayer = function (gameType, stage, usrInfo) {
-	if (gameType == consts.GameType.PDK_15) {
-		if (this._isRobot(usrInfo.openid)) {
-			let robotPlayers = this.pdk15_info[stage].robotPlayers;
-			if (!this._isInList(robotPlayers, usrInfo.id)) {
-				robotPlayers.push(usrInfo);
-			}
-		} else {
-			let readyPlayers = this.pdk15_info[stage].readyPlayers;
-			if (!this._isInList(readyPlayers, usrInfo.id)) {
-				readyPlayers.push(usrInfo);
-			}
-		}
-	}
-};
 
 // 匹配玩家
 pro._checkMatchPDK15 = function (stage) {
@@ -258,40 +229,6 @@ pro._removeReadyListByTeam = function (stage, team) {
 	}
 };
 
-// 是否是机器人
-pro._isRobot = function (openid) {
-	if (openid.indexOf("robot_") != -1) {
-		return true;
-	}
-	return false;
-};
-
-// 是否已经牌桌里
-pro._isInTable = function (stage, id) {
-	let hallInfo = this.pdk15_info[stage];
-	let startTeams = hallInfo.startTeams;
-	for (let i = 0; i < startTeams.length; i++) {
-		const team = startTeams[i];
-		for (let j = 0; j < team.length; j++) {
-			const user = team[j];
-			if (user.id == id) {
-				return true;
-			}
-		}
-	}
-	return false;
-};
-
-// 是否已经在列表中
-pro._isInList = function (list, id) {
-	for (let i = 0; i < list.length; i++) {
-		const user = list[i];
-		if (user.id == id) {
-			return true;
-		}
-	}
-	return false;
-};
 
 // 把队伍从已开赛列表中移除
 pro.removeFromStartList = function (gameType, stage, team, cb) {
