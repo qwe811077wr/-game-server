@@ -23,10 +23,15 @@ pro.init = function (opts) {
 };
 
 // 获取金币场游戏大厅信息
-pro.getMatchInfo = function (msg, session, next) {
-	// pomelo.app.rpc.matchGlobal.matchRemote.getMatchInfo(null, gameType, function (resp) {
-	// 	next(null, resp);
-	// });
+pro.getMatchInfo = function (gameType, next) {
+	if (!this._checkValid(gameType, 0)) {
+		next(null, {code: consts.MatchCode.GAEM_TYPE_INVALID});
+		return;
+	}
+
+	pomelo.app.rpc.matchGlobal.matchRemote.getMatchInfo(null, gameType, function (resp) {
+		next(null, resp);
+	});
 };
 
 // 进入金币场

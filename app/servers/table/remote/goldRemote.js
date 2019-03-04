@@ -55,3 +55,9 @@ pro.joinGoldRoom = function (roomid, usrInfo, cb) {
 	}
 	cb(resp);
 };
+
+pro.autoReadyGame = function (roomid, uid, cb) {
+	let goldEntity = entityManager.getEntity(roomid);
+	goldEntity.readyGame(uid);
+	cb();
+};

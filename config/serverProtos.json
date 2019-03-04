@@ -7,8 +7,10 @@
 		"required uInt32 coins": 5,
 		"required uInt32 gems": 6,
 		"required uInt32 chairID": 7,
-		"required uInt32 dissolveState": 8,
-		"required uInt32 readyState": 9
+		"required uInt32 readyState": 8,
+		"optional uInt32 dissolveState": 9,
+		"optional string preSid": 10,
+		"optional uInt32 autoState": 11
 	},
 
 	"onLeaveRoom": {

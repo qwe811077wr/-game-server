@@ -2,6 +2,7 @@
  * Date: 2019/2/20
  * Author: admin
  * Description: 
+ * 匹配规则: 只匹配机器人, 机器人进入房间自动准备
  */
 let pomelo = require('pomelo');
 var logger = require('pomelo-logger').getLogger('game', 'matchStub');
@@ -28,6 +29,7 @@ var MatchStub = function (app) {
 var pro  = MatchStub.prototype;
 
 pro._init = function () {
+	let self = this;
 	// pdk15 init
 	this.matchInfo[consts.GameType.PDK_15] = {};
 	this.robotList[consts.GameType.PDK_15] = {};
@@ -43,7 +45,18 @@ pro._init = function () {
 
 // 获取金币场大厅信息
 pro.getMatchInfo = function (gameType, cb) {
-	
+	let gameInfo = [];
+	let robotStages = this.robotList[gameType];
+	for (let i = 0; i < robotStages.length; i++) {
+		const robots = robotStages[i];
+		gameInfo.push(robots.length);
+	}
+
+	let resp = {
+		code: consts.MatchCode.OK,
+		gameInfo: gameInfo
+	}
+	cb(resp);
 };
 
 // 进入房间
@@ -81,12 +94,12 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 	}
 };
 
-// 获取一个机器人信息
-pro._getRobotInfo = function () {
-	
+// 从机器人列表移除一个机器人并将其返回
+pro._spliceRobotToReadyList = function (gameType, stage) {
+	let robotArr = this.robotList[gameType][stage]
+	let robot = robotArr.splice(0, 1);
+	return robot[0];
 };
-
-// 移除
 
 // 是否在数组中
 pro._isInArray = function (id, array) {
@@ -114,15 +127,15 @@ pro._updateRoomInfo = function (gameType, stage, roomInfo) {
 };
 
 // 移除房间信息
-pro._removeRoomInfo = function (gameType, stage, roomId) {
+pro._removeRoomInfo = function (gameType, stage, roomid) {
 	let list = this.matchInfo[gameType][stage];
-	delete list[roomId];
+	delete list[roomid];
 };
 
 // 查找房间信息
-pro._findRoomInfo = function (gameType, stage, roomId) {
+pro._findRoomInfo = function (gameType, stage, roomid) {
 	let list = this.matchInfo[gameType][stage];
-	let roomInfo = list[roomId];
+	let roomInfo = list[roomid];
 	return roomInfo;
 };
 
@@ -135,129 +148,59 @@ pro._startMatchRobot = function (gameType, stage) {
 		if (roomInfo.players.length < 3) {
 			// 加入房间
 			let toServerId = roomInfo.toServerId;
-			let roomId = roomInfo.roomid;
-			let usrInfo = 
-			pomelo.app.rpc.table.goldRemote.joinGoldRoom.toServer(toServerId, roomId, usrInfo, function (resp) {
+			let roomid = roomInfo.roomid;
+			let usrInfo = this._spliceRobotToReadyList(gameType, stage);
+			if (!usrInfo) {
+				return;
+			}
+			pomelo.app.rpc.table.goldRemote.joinGoldRoom.toServer(toServerId, roomid, usrInfo, function (resp) {
+				logger.info('JoinGoldRoom Callback:', resp);
 				if (resp.code == consts.RoomCode.OK) {
 					let roomInfo = resp.roomInfo;
 					roomInfo.toServerId = toServerId;
 					self._updateRoomInfo(gameType, stage, roomInfo);
+					self._enterRoomCtr(usrInfo, roomInfo);
+				} else {
+					self._addRobotToReadyList(gameType, stage, usrInfo);
 				}
 			});
 		}
 	}
 };
 
+pro._enterRoomCtr = function (usrInfo, roomInfo) {
+	// 绑定serverid、table_key
+	let tableID = roomInfo.roomid;
+	let toServerID = roomInfo.toServerId;
+	let preSid = usrInfo.preSid;
+	pomelo.app.rpc.connector.entryRemote.onEnterGoldGame.toServer(preSid, usrInfo.id, tableID, toServerID, null);
+	
+	// 推送玩家加入信息
+	let user = this._getUserInfoByUid(usrInfo.id, roomInfo.players);
+	this._notifyUserEnterRoom(roomInfo.players, 'onUserEntryRoom', user);
 
-
-
-///-----------------------------------------------------------------
-
-// 匹配玩家
-pro._checkMatchPDK15 = function (stage) {
-	let hallInfo = this.pdk15_info[stage];
-	let readyPlayers = hallInfo.readyPlayers;
-	let robotPlayers = hallInfo.robotPlayers;
-	let startTeams = hallInfo.startTeams;
-	if (readyPlayers[0]) {
-		let remainPlayers = readyPlayers.slice(1, readyPlayers.length) || [];
-		let mergePlayers = robotPlayers.concat(remainPlayers);
-		if (mergePlayers.length < 2) {
-			return;
-		}
-		mergePlayers = this._shuffleArray(mergePlayers);
-		let team = [];
-		team.push(readyPlayers[0]);
-		team.push(mergePlayers[0]);
-		team.push(mergePlayers[1]);
-		startTeams.push(team);
-		logger.info('matchTeam=', team);
-
-		this._removeReadyListByTeam(stage, team);
-
-		// 队伍创房开始比赛
-		this._createTeamTable(consts.GameType.PDK_15, stage, team);
+	// 机器人自动准备
+	if (this._isRobot(usrInfo.openid)) {
+		pomelo.app.rpc.table.goldRemote.autoReadyGame.toServer(toServerId, tableID, usrInfo.id, null);
 	}
 };
 
-// 队伍远程创建牌桌
-pro._createTeamTable = function (gametype, stage, team) {
-	let leader = team[0];
-	let tables = pomelo.app.getServersByType('table');
-	let res = dispatcher.dispatch(leader.id, tables);
-	pomelo.app.rpc.table.goldRemote.startGame.toServer(res.id, gametype, stage, team, null);
+pro._notifyUserEnterRoom = function (players, route, msg) {
+	var uids = [];
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
+        uids.push({uid: user.id, sid: user.preSid});
+	}
+    if (uids.length) {
+        messageService.pushMessageByUids(uids, route, msg);
+    }
 };
 
-// 混乱数组
-pro._shuffleArray = function (array) {
-	let temp = array.slice(0);
-	array = [];
-	while (temp.length > 0) {
-		let idx = Math.floor(Math.random() * 10000) % temp.length;
-		array.push(temp[idx]);
-		temp.splice(idx, 1);
-	}
-	return array;
-};
-
-// 队伍里玩家从准备列表移除
-pro._removeReadyListByTeam = function (stage, team) {
-	let hallInfo = this.pdk15_info[stage];
-	let readyPlayers = hallInfo.readyPlayers;
-	let robotPlayers = hallInfo.robotPlayers;
-	for (let i = 0; i < team.length; i++) {
-		const user = team[i];
-		if (this._isRobot(user.openid)) {
-			// 机器人
-			for (let m = 0; m < robotPlayers.length; m++) {
-				const _user = robotPlayers[m];
-				if (_user.id == user.id) {
-					robotPlayers.splice(m, 1);
-					break;
-				}
-			}
-		} else {
-			// 真实玩家
-			for (let m = 0; m < readyPlayers.length; m++) {
-				const _user = readyPlayers[m];
-				if (_user.id == user.id) {
-					readyPlayers.splice(m, 1);
-					break;
-				}
-			}
+pro._getUserInfoByUid = function (uid, players) {
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
+		if (uid == user.id) {
+			return user;
 		}
 	}
-};
-
-
-// 把队伍从已开赛列表中移除
-pro.removeFromStartList = function (gameType, stage, team, cb) {
-	logger.info('removeTeam=', team);
-	if (gameType == consts.GameType.PDK_15) {
-		let hallInfo = this.pdk15_info[stage];
-		let startTeams = hallInfo.startTeams;
-		let isFind = false;
-		for (let i = 0; i < startTeams.length; i++) {
-			const starteam = startTeams[i];
-			for (let j = 0; j < starteam.length; j++) {
-				const user = starteam[j];
-				if (user.id == team[j].id) {
-					isFind = true;
-				} else {
-					isFind = false;
-					break;
-				}
-			}
-			if (isFind) {
-				startTeams.splice(i, 1);
-				break;
-			}
-		}
-		if (!isFind) {
-			logger.warn('no find team in startTeams.');
-		}
-	} else {
-		logger.warn('no exist playway type[%d]', gameType);
-	}
-	cb();
 };

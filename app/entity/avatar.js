@@ -54,6 +54,10 @@ pro.updateUserRoomId = function (roomid) {
     this.roomid = roomid;
 };
 
+pro.updateUserGoldRoomid = function (goldRoomId) {
+    this.goldRoomId = goldRoomId;
+};
+
 // 存盘信息更新
 pro.getDBProp = function () {
     let props = this.avatarProp.getPersistProp();

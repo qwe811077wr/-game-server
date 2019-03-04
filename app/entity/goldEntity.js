@@ -31,7 +31,6 @@ pro.initGoldRoom = function (usrInfo, stage) {
 		creator: usrInfo.id,
 		createTime: Math.ceil(Date.now()/1000),
 		status: consts.TableStatus.INIT,
-		// autoinfo: [0, 0, 0],   // 托管信息
 		stage: stage,
 		players: [],
 		//游戏开始卡牌信息
@@ -85,15 +84,62 @@ pro.addUserToPlayers = function (usrInfo, chairID) {
 		gems: usrInfo.gems,
 		chairID: chairID,
 		readyState: consts.ReadyState.Ready_No,
+		preSid: usrInfo.preSid,
 		autoState: consts.AutoState.AutoNo
 	};
 	this.roomInfo.players.push(playerInfo);
 };
 
+pro.readyGame = function (uid, next) {
+	let roomState = this.roomInfo.status;
+	if (roomState == consts.TableStatus.START) {
+		utils.invokeCallback(next, null, {code: consts.ReadyGameCode.GAME_STARTED});
+	}else {
+		utils.invokeCallback(next, null, {code: consts.ReadyGameCode.OK});
+		this.setPlayerReadyState(uid, consts.ReadyState.Ready_Yes);
+		let readyCount = this.getPlayerReadyCount();
+		let playerCount = 3;
+		if (readyCount >= playerCount) {
+			// 游戏开始
+			this._startGame();
+		} else{
+			// 推送准备状态
+			let route = 'onReadyGame';
+			let msg = {wChairID: this._getChairIDByUid(uid)};
+			this._notifyMsgToOtherMem(uid, this.roomInfo.players, route, msg);
+		}
+	}
+};
 
+// uid 为空设置所有玩家
+pro.setPlayerReadyState = function (uid, state) {
+	let players = this.roomInfo.players;
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
+		if (uid && user.id === uid) {
+			this.roomInfo.players[i].readyState = state;
+			break;
+		} else {
+			this.roomInfo.players[i].readyState = state;
+		}
+	}
+};
+
+pro.getPlayerReadyCount = function () {
+	let players = this.roomInfo.players;
+	let count = 0;
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
+		if (user.readyState === consts.ReadyState.Ready_Yes) {
+			count = count + 1;
+		}
+	}
+	return count;
+};
 
 // 游戏开始
 pro._startGame = function () {
+	this.roomInfo.status = consts.TableStatus.START;
 	// 洗牌
 	let cardData = pdkHelper.RandCardList();
 
@@ -122,8 +168,8 @@ pro._startGame = function () {
     this.cardInfo.currentUser = banker;
 	
 	// 游戏开始,通知发牌
-	for (let i = 0; i < this.team.length; i++) {
-		const user = this.team[i];
+	for (let i = 0; i < this.roomInfo.players.length; i++) {
+		const user = this.roomInfo.players[i];
 		let sid = user.preSid;
 		let route = 'onStartGame';
 		let msg = {
@@ -137,14 +183,6 @@ pro._startGame = function () {
 		}]
 		messageService.pushMessageByUids(uids, route, msg);
 		this.logger.info("name[%s] sid[%s] msg[%s]", user.name, sid, route);
-
-		// 插入charirID
-		this.team[i].chairID = i;
-
-		// 绑定serverid、table_key
-		let tableID = this.id;
-		let toServerID = pomelo.app.getServerId();
-		pomelo.app.rpc.connector.entryRemote.onGoldStartGame.toServer(sid, user.id, tableID, toServerID, null);
 	}
 	this._resetAutoSchedule(20);
 };
@@ -168,8 +206,7 @@ pro._getBankerUser = function(handCardData, cbCard)
 // 出牌(参数为空是托管AI出牌)
 pro.playCard = function(uid, bCardData, bCardCount, next) {
 	let cardInfo = this.cardInfo;
-	let team = this.team;
-	let playerCount = team.length;
+	let playerCount = 3;
 	let wChairID = null;
 	if (uid) {
 		wChairID = this._getChairIDByUid(uid);
@@ -281,21 +318,21 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 
 	if (cardInfo.currentUser == consts.InvalUser) {
 		// 结算消息
-		this.logger.info('赢家: [%d](%s), 出牌:', wChairID, team[wChairID].name, bCardData);
+		this.logger.info('赢家: [%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 		this._broadcastSettlementMsg(wChairID);
 		// 销毁房间
 		this.destroy();
 	} else {
-		this.logger.info('当前:[%d](%s), 出牌:', wChairID, team[wChairID].name, bCardData);
+		this.logger.info('当前:[%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 		// 要不起自动下一手
 		this._checkNextOutCard(wChairID, cardInfo.currentUser);
 	}
 };
 
 pro._getChairIDByUid = function (uid) {
-	let team = this.team;
-	for (let i = 0; i < team.length; i++) {
-		const user = team[i];
+	let players = this.roomInfo.players;
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
 		if (uid == user.id) {
 			return user.chairID;
 		}
@@ -309,7 +346,7 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 	}
 
 	let cardInfo = this.cardInfo;
-	let playerCount = this.team.length;
+	let playerCount = 3;
 	let handCardData = cardInfo.handCardData[nextChariID];
 	let cardCount = cardInfo.cardCount[nextChariID];
 	let turnCardData = cardInfo.turnCardData;
@@ -321,8 +358,7 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 		let wPassUser = nextChariID;
 		let currentUser=(wPassUser+1) % playerCount;
 		this.cardInfo.currentUser = currentUser;
-		let team = this.team;
-		this.logger.info('要不起:[%d](%s)',wPassUser, team[wPassUser].name);
+		this.logger.info('要不起:[%d](%s)',wPassUser, this.roomInfo.players[wPassUser].name);
 
 		// 推送要不起消息
 		this._broadcastPassCardMsg(wPassUser, currentUser);
@@ -408,8 +444,8 @@ pro._broadcastAutoCardMsg = function (wAutoUser, bAuto) {
 // uid 为空向队伍里所有人推送, 否则指定uid推送
 pro._notifyMsgToOtherMem = function (uid, route, msg) {
 	var uids = [];
-	for (let i = 0; i < this.team.length; i++) {
-		const user = this.team[i];
+	for (let i = 0; i < this.roomInfo.players.length; i++) {
+		const user = this.roomInfo.players[i];
 		if (uid) {
 			if (user.id == uid) {
 				let preServerID = user.preSid;
@@ -469,14 +505,31 @@ pro.autoCard = function (uid, bAuto, next) {
 	next(null, consts.OK);
 };
 
+pro.leaveRoom = function (uid, next) {
+	// 房间不存在
+	if (this.isDestroyed()) {
+		next(null, {code: consts.LeaveRoomCode.NO_EXIST_ROOM});
+		return;
+	}
+
+	// 已经开局不能退出
+	if (this.roomInfo.status === consts.TableStatus.START) {
+		next(null, {code: consts.LeaveRoomCode.START_GAME_NO_LEAVE});
+		return;
+	}
+
+	// 解散房间
+	next(null, {code: consts.LeaveRoomCode.LEAVE_ROOM_DISSOLVE});
+	this.destroy();
+};
+
 // 销毁
 pro.destroy = function () {
 	this._clearAutoSchedul();
-	for (let i = 0; i < this.team.length; i++) {
-		const user = this.team[i];
+	for (let i = 0; i < this.roomInfo.players.length; i++) {
+		const user = this.roomInfo.players[i];
 		let preServerID = user.preSid;
 		pomelo.app.rpc.connector.entryRemote.onGoldDissolveGame.toServer(preServerID, user.id, null);
 	}
-	pomelo.app.rpc.matchGlobal.matchRemote.removeFromStartList(null, this.gametype, this.stage, this.team, null);
 	Entity.prototype.destroy.call(this);
 };

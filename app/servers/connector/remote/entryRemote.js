@@ -44,10 +44,11 @@ pro.onLeaveRoom = function (avtID, roomID, cb) {
     cb();
 };
 
-// 金币场开始
-pro.onGoldStartGame = function (avtID, tableID, toServerID, cb) {
-    logger.info('avtID[%s] tableID[%s] toServerID[%s] onGoldStartGame.', avtID, tableID, toServerID);
+// 进入金币场
+pro.onEnterGoldGame = function (avtID, tableID, toServerID, cb) {
+    logger.info('avtID[%s] tableID[%s] toServerID[%s] onEnterGoldGame.', avtID, tableID, toServerID);
     var avatar = entityManager.getEntity(avtID);
+    avatar.updateUserGoldRoomid(tableID);
     avatar.setSessionSetting("tableID", tableID);
     avatar.setSessionSetting("tableServer", toServerID);
     avatar.importSessionSetting();
@@ -56,7 +57,8 @@ pro.onGoldStartGame = function (avtID, tableID, toServerID, cb) {
 
 // 金币场解散房间
 pro.onGoldDissolveGame = function (avtID, cb) {
-	var avatar = entityManager.getEntity(avtID);
+    var avatar = entityManager.getEntity(avtID);
+    avatar.updateUserGoldRoomid(0);
 	var sessionService = pomelo.app.get('sessionService');
     var sessions = sessionService.getByUid(avatar.id);
     if (sessions && sessions.length > 0) {
