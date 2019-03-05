@@ -106,7 +106,7 @@ pro.readyGame = function (uid, next) {
 			// 推送准备状态
 			let route = 'onReadyGame';
 			let msg = {wChairID: this._getChairIDByUid(uid)};
-			this._notifyMsgToOtherMem(uid, this.roomInfo.players, route, msg);
+			this._notifyMsgToOtherMem(null, route, msg);
 		}
 	}
 };
