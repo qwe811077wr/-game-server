@@ -114,12 +114,11 @@ pro.readyGame = function (uid, next) {
 // uid 为空设置所有玩家
 pro.setPlayerReadyState = function (uid, state) {
 	let players = this.roomInfo.players;
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-		if (uid && user.id === uid) {
-			this.roomInfo.players[i].readyState = state;
-			break;
-		} else {
+	if (uid) {
+		let wChairID = this._getChairIDByUid(uid);
+		this.roomInfo.players[wChairID].readyState = state;
+	} else {
+		for (let i = 0; i < players.length; i++) {
 			this.roomInfo.players[i].readyState = state;
 		}
 	}
