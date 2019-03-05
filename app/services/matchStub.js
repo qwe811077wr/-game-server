@@ -40,7 +40,7 @@ pro._init = function () {
 		this.robotList[consts.GameType.PDK_15][i] = [];
 		this.schedulList[consts.GameType.PDK_15][i] = setInterval(function () {
 			self._startMatchRobot(consts.GameType.PDK_15, i);
-		}, 1000 + i * 3000);
+		}, 3000 + i * 3000);
 	}
 };
 
@@ -151,11 +151,12 @@ pro._findRoomInfo = function (gameType, stage, roomid) {
 // 开始匹配机器人
 pro._startMatchRobot = function (gameType, stage) {
 	let self = this;
-	let list = this.matchInfo[gameType][stage];
-	for (let i in list) {
-		const roomInfo = list[i];
-		if (roomInfo.players.length < 3) {
-			// 加入房间
+	let roomList = this.matchInfo[gameType][stage];
+	for (let i in roomList) {
+		const roomInfo = roomList[i];
+		let remainPlayerCount = 3 - roomInfo.players.length;
+		for (let index = 0; index < remainPlayerCount; index++) {
+			// 填充机器人加入
 			let toServerId = roomInfo.toServerId;
 			let roomid = roomInfo.roomid;
 			let usrInfo = this._spliceRobotToReadyList(gameType, stage);
@@ -163,7 +164,7 @@ pro._startMatchRobot = function (gameType, stage) {
 				return;
 			}
 			pomelo.app.rpc.table.goldRemote.joinGoldRoom.toServer(toServerId, roomid, usrInfo, function (resp) {
-				logger.info('Robot Enter Room::', resp, usrInfo);
+				logger.info('加入机器人:', resp);
 				if (resp.code == consts.RoomCode.OK) {
 					let roomInfo = resp.roomInfo;
 					roomInfo.toServerId = toServerId;

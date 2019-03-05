@@ -494,7 +494,7 @@ pro._resetAutoSchedule = function (dt) {
 
 	// 已经托管不能直接调用playCard，要有延时(TODO:原因以后研究...)
 	if (self._getAutoState(wChairID) == consts.AutoState.AutoYes) {
-		dt = 1;
+		dt = 2;
 	}
 
 	self.autoSchedule = setInterval(function () {
