@@ -158,14 +158,14 @@ pro._startGame = function () {
 		handCardData.push(carditem);
 		pos = pos + consts.MaxCardCount;
 		pdkHelper.SortCardList(handCardData[i], consts.MaxCardCount);
-		this.cardInfo.handCardData[i] = carditem;
-		this.cardInfo.cardCount[i] = consts.MaxCardCount;
+		this.roomInfo.cardInfo.handCardData[i] = carditem;
+		this.roomInfo.cardInfo.cardCount[i] = consts.MaxCardCount;
 	}
 	this.logger.info('玩家手牌数据:', handCardData);
 
     // 黑桃3先出
     var banker = this._getBankerUser(handCardData, 3);
-    this.cardInfo.currentUser = banker;
+    this.roomInfo.cardInfo.currentUser = banker;
 	
 	// 游戏开始,通知发牌
 	for (let i = 0; i < this.roomInfo.players.length; i++) {
@@ -205,7 +205,7 @@ pro._getBankerUser = function(handCardData, cbCard)
 
 // 出牌(参数为空是托管AI出牌)
 pro.playCard = function(uid, bCardData, bCardCount, next) {
-	let cardInfo = this.cardInfo;
+	let cardInfo = this.roomInfo.cardInfo;
 	let playerCount = 3;
 	let wChairID = null;
 	if (uid) {
@@ -355,7 +355,7 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 		return false;
 	}
 
-	let cardInfo = this.cardInfo;
+	let cardInfo = this.roomInfo.cardInfo;
 	let playerCount = 3;
 	let handCardData = cardInfo.handCardData[nextChariID];
 	let cardCount = cardInfo.cardCount[nextChariID];
@@ -367,7 +367,7 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 		// 要不起
 		let wPassUser = nextChariID;
 		let currentUser=(wPassUser+1) % playerCount;
-		this.cardInfo.currentUser = currentUser;
+		this.roomInfo.cardInfo.currentUser = currentUser;
 		this.logger.info('要不起:[%d](%s)',wPassUser, this.roomInfo.players[wPassUser].name);
 
 		// 推送要不起消息
@@ -388,14 +388,14 @@ pro._broadcastHandCardMsg = function (uid) {
 	let route = 'onHandCardUser';
 	let msg = {
 		wChairID: wChairID,
-		handCardData: this.cardInfo.handCardData[wChairID]
+		handCardData: this.roomInfo.cardInfo.handCardData[wChairID]
 	};
 	this._notifyMsgToOtherMem(uid, route, msg);
 };
 
 // 推送单张报警消息
 pro._broadcastSingCardMsg = function (wChairID) {
-	let cardInfo = this.cardInfo;
+	let cardInfo = this.roomInfo.cardInfo;
 	cardInfo.bUserWarn[wChairID] = true;
 	let route = 'onWarnUser';
 	let msg = {wWarnUser: wChairID};
@@ -444,7 +444,7 @@ pro._broadcastAutoCardMsg = function (wAutoUser, bAuto) {
 	}
 	this._notifyMsgToOtherMem(null, route, msg);
 	this._setAutoState(wAutoUser, bAuto);
-	if (bAuto == consts.AutoState.AutoYes && wAutoUser == this.cardInfo.currentUser) {
+	if (bAuto == consts.AutoState.AutoYes && wAutoUser == this.roomInfo.cardInfo.currentUser) {
 		// 自动出牌
 		this.playCard();
 	}
@@ -488,7 +488,7 @@ pro._resetAutoSchedule = function (dt) {
 	dt = dt || 15;  // 默认15s自动托管
 	self._clearAutoSchedul();
 	
-	let wChairID = self.cardInfo.currentUser;
+	let wChairID = this.roomInfo.cardInfo.currentUser;
 	if (wChairID == consts.InvalUser) {
 		return;
 	}

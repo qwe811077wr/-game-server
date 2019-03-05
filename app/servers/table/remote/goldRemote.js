@@ -1,4 +1,5 @@
 var entityFactory = require('../../../entity/entityFactory');
+var entityManager = require('../../../services/entityManager');
 var consts = require('../../../common/consts');
 
 module.exports = function (app) {

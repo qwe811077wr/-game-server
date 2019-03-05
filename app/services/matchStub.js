@@ -8,6 +8,7 @@ let pomelo = require('pomelo');
 var logger = require('pomelo-logger').getLogger('game', 'matchStub');
 var consts = require('../common/consts');
 var dispatcher = require('../util/dispatcher');
+let messageService = require('../services/messageService');
 
 var instance = null;
 
@@ -31,9 +32,9 @@ var pro  = MatchStub.prototype;
 pro._init = function () {
 	let self = this;
 	// pdk15 init
-	this.matchInfo[consts.GameType.PDK_15] = {};
-	this.robotList[consts.GameType.PDK_15] = {};
-	this.schedulList[consts.GameType.PDK_15] = {};
+	this.matchInfo[consts.GameType.PDK_15] = [];
+	this.robotList[consts.GameType.PDK_15] = [];
+	this.schedulList[consts.GameType.PDK_15] = [];
 	for (let i = 0; i < consts.PdkStageCount; i++) {
 		this.matchInfo[consts.GameType.PDK_15][i] = {};
 		this.robotList[consts.GameType.PDK_15][i] = [];
@@ -47,10 +48,12 @@ pro._init = function () {
 pro.getMatchInfo = function (gameType, cb) {
 	let gameInfo = [];
 	let robotStages = this.robotList[gameType];
-	for (let i = 0; i < robotStages.length; i++) {
+	let i = 0;
+	do {
 		const robots = robotStages[i];
 		gameInfo.push(robots.length);
-	}
+		i++;
+	} while (i < robotStages.length);
 
 	let resp = {
 		code: consts.MatchCode.OK,

@@ -1,6 +1,6 @@
 {
 	"onUserEntryRoom": {
-		"required uInt32 id": 1,
+		"required string id": 1,
 		"required string name": 2,
 		"required uInt32 gender": 3,
 		"required string avatarUrl": 4,
