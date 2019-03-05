@@ -58,7 +58,7 @@ pro.onEnterGoldGame = function (avtID, tableID, toServerID, cb) {
 // 金币场解散房间
 pro.onGoldDissolveGame = function (avtID, cb) {
     var avatar = entityManager.getEntity(avtID);
-    avatar.updateUserGoldRoomid(0);
+    avatar.updateUserGoldRoomid("0");
 	var sessionService = pomelo.app.get('sessionService');
     var sessions = sessionService.getByUid(avatar.id);
     if (sessions && sessions.length > 0) {
