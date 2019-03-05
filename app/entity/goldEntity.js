@@ -31,6 +31,7 @@ pro.initGoldRoom = function (usrInfo, stage) {
 		creator: usrInfo.id,
 		createTime: Math.ceil(Date.now()/1000),
 		status: consts.TableStatus.INIT,
+		gameType: consts.GameType.PDK_15,
 		stage: stage,
 		players: [],
 		//游戏开始卡牌信息
@@ -98,8 +99,7 @@ pro.readyGame = function (uid, next) {
 		utils.invokeCallback(next, null, {code: consts.ReadyGameCode.OK});
 		this.setPlayerReadyState(uid, consts.ReadyState.Ready_Yes);
 		let readyCount = this.getPlayerReadyCount();
-		let playerCount = 3;
-		if (readyCount >= playerCount) {
+		if (readyCount >= 3) {
 			// 游戏开始
 			this._startGame();
 		} else{
@@ -320,13 +320,23 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		// 结算消息
 		this.logger.info('赢家: [%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 		this._broadcastSettlementMsg(wChairID);
-		// 销毁房间
-		this.destroy();
+		// 重置房间数据
+		this._resetRoomData();
 	} else {
 		this.logger.info('当前:[%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 		// 要不起自动下一手
 		this._checkNextOutCard(wChairID, cardInfo.currentUser);
 	}
+};
+
+// 重置房间数据
+pro._resetRoomData = function () {
+	this.roomInfo.status = consts.TableStatus.INIT;
+	this.roomInfo.cardInfo.turnCardData = [];
+	this.roomInfo.cardInfo.turnCardCount = 0;
+	this.roomInfo.cardInfo.turnUser = consts.InvalUser;
+	this.roomInfo.cardInfo.bUserWarn = [false, false, false];
+	this.setPlayerReadyState(null, consts.ReadyState.Ready_No);
 };
 
 pro._getChairIDByUid = function (uid) {
@@ -433,9 +443,8 @@ pro._broadcastAutoCardMsg = function (wAutoUser, bAuto) {
 		bAuto: bAuto
 	}
 	this._notifyMsgToOtherMem(null, route, msg);
-	
-	this.autoinfo[wAutoUser] = bAuto;
-	if (bAuto == 1 && wAutoUser == this.cardInfo.currentUser) {
+	this._setAutoState(wAutoUser, bAuto);
+	if (bAuto == consts.AutoState.AutoYes && wAutoUser == this.cardInfo.currentUser) {
 		// 自动出牌
 		this.playCard();
 	}
@@ -463,6 +472,16 @@ pro._notifyMsgToOtherMem = function (uid, route, msg) {
     }
 };
 
+// 设置托管状态
+pro._setAutoState = function (wChairID, state) {
+	this.roomInfo.players[wChairID].autoState = state;
+};
+
+// 得到托管状态
+pro._getAutoState = function (wChairID) {
+	return this.roomInfo.players[wChairID].autoState;
+}
+
 // 托管定时器重置
 pro._resetAutoSchedule = function (dt) {
 	let self = this;
@@ -475,17 +494,17 @@ pro._resetAutoSchedule = function (dt) {
 	}
 
 	// 已经托管不能直接调用playCard，要有延时(TODO:原因以后研究...)
-	if (self.autoinfo[wChairID] == 1) {
+	if (self._getAutoState(wChairID) == consts.AutoState.AutoYes) {
 		dt = 1;
 	}
 
 	self.autoSchedule = setInterval(function () {
-		if (self.autoinfo[wChairID] == 1) {
+		if (self._getAutoState(wChairID) == consts.AutoState.AutoYes) {
 			// 已经托管
 			self.playCard();
 		} else {
 			// 进入托管
-			self._broadcastAutoCardMsg(wChairID, 1);
+			self._broadcastAutoCardMsg(wChairID, consts.AutoState.AutoYes);
 		}
 	}, dt * 1000);
 };
@@ -526,8 +545,15 @@ pro.leaveRoom = function (uid, next) {
 // 销毁
 pro.destroy = function () {
 	this._clearAutoSchedul();
-	for (let i = 0; i < this.roomInfo.players.length; i++) {
-		const user = this.roomInfo.players[i];
+
+	let gameType = this.roomInfo.gameType;
+	let stage = this.roomInfo.stage;
+	let goldRoomId = this.roomInfo.roomid;
+	let players = this.roomInfo.players;
+	pomelo.app.rpc.matchGlobal.matchRemote.dissolveGoldRoom(null, gameType, stage, goldRoomId, null);
+
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
 		let preServerID = user.preSid;
 		pomelo.app.rpc.connector.entryRemote.onGoldDissolveGame.toServer(preServerID, user.id, null);
 	}

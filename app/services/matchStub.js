@@ -80,10 +80,12 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 
 	pomelo.app.rpc.table.goldRemote.enterGoldRoom.toServer(toServerId, gameType, stage, usrInfo, function (resp) {
 		cb(resp);
-		let roomInfo = resp.roomInfo;
-		roomInfo.toServerId = toServerId;
-		self._updateRoomInfo(gameType, stage, roomInfo);
-		self._enterRoomCtr(usrInfo, roomInfo);
+		if (resp.code == consts.RoomCode.OK) {
+			let roomInfo = resp.roomInfo;
+			roomInfo.toServerId = toServerId;
+			self._updateRoomInfo(gameType, stage, roomInfo);
+			self._enterRoomCtr(usrInfo, roomInfo);
+		}
 	});
 };
 
@@ -92,6 +94,7 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 	let robotArr = this.robotList[gameType][stage]
 	if (!this._isInArray(usrInfo.id, robotArr)) {
 		robotArr.push(usrInfo);
+		logger.info('添加机器人:', usrInfo);
 	}
 };
 
@@ -99,6 +102,7 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 pro._spliceRobotToReadyList = function (gameType, stage) {
 	let robotArr = this.robotList[gameType][stage]
 	let robot = robotArr.splice(0, 1);
+	logger.info('移除机器人:', robot);
 	return robot[0];
 };
 
@@ -130,6 +134,7 @@ pro._updateRoomInfo = function (gameType, stage, roomInfo) {
 // 移除房间信息
 pro._removeRoomInfo = function (gameType, stage, roomid) {
 	let list = this.matchInfo[gameType][stage];
+	logger.info('房间移除:', roomid);
 	delete list[roomid];
 };
 
@@ -144,7 +149,7 @@ pro._findRoomInfo = function (gameType, stage, roomid) {
 pro._startMatchRobot = function (gameType, stage) {
 	let self = this;
 	let list = this.matchInfo[gameType][stage];
-	for (let i = 0; i < list.length; i++) {
+	for (let i in list) {
 		const roomInfo = list[i];
 		if (roomInfo.players.length < 3) {
 			// 加入房间
@@ -155,7 +160,7 @@ pro._startMatchRobot = function (gameType, stage) {
 				return;
 			}
 			pomelo.app.rpc.table.goldRemote.joinGoldRoom.toServer(toServerId, roomid, usrInfo, function (resp) {
-				logger.info('JoinGoldRoom Callback:', resp);
+				logger.info('Robot Enter Room::', resp, usrInfo);
 				if (resp.code == consts.RoomCode.OK) {
 					let roomInfo = resp.roomInfo;
 					roomInfo.toServerId = toServerId;
@@ -178,15 +183,10 @@ pro._enterRoomCtr = function (usrInfo, roomInfo) {
 	
 	// 推送玩家加入信息
 	let user = this._getUserInfoByUid(usrInfo.id, roomInfo.players);
-	this._notifyUserEnterRoom(roomInfo.players, 'onUserEntryRoom', user);
-
-	// 机器人自动准备
-	if (this._isRobot(usrInfo.openid)) {
-		pomelo.app.rpc.table.goldRemote.autoReadyGame.toServer(toServerId, tableID, usrInfo.id, null);
-	}
+	this._notifyMsgToAllUser(roomInfo.players, 'onUserEntryRoom', user);
 };
 
-pro._notifyUserEnterRoom = function (players, route, msg) {
+pro._notifyMsgToAllUser = function (players, route, msg) {
 	var uids = [];
 	for (let i = 0; i < players.length; i++) {
 		const user = players[i];
@@ -204,4 +204,18 @@ pro._getUserInfoByUid = function (uid, players) {
 			return user;
 		}
 	}
+};
+
+pro.dissolveGoldRoom = function (gameType, stage, goldRoomId, cb) {
+	let roomInfo = this._findRoomInfo(gameType, stage, goldRoomId);
+	let players = roomInfo.players;
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
+		if (this._isRobot(user.openid)) {
+			// 机器人自动加入准备列表
+			this._addRobotToReadyList(gameType, stage, user);
+		}
+	}
+	this._removeRoomInfo(gameType, stage, goldRoomId);
+	cb();
 };

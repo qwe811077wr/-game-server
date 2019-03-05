@@ -21,3 +21,7 @@ pro.getMatchInfo = function (gameType, cb) {
 pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 	this.app.get('matchStub').enterGoldRoom(gameType, stage, usrInfo, cb);
 };
+
+pro.dissolveGoldRoom = function (gameType, stage, goldRoomId, cb) {
+	this.app.get('matchStub').dissolveGoldRoom(gameType, stage, goldRoomId, cb);
+};
