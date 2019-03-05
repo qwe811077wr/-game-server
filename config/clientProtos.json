@@ -25,11 +25,11 @@
 		"required uInt32 roomid": 1
 	},
 
-	"connector.lobbyHandler.getMatchInfo": {
+	"connector.matchHandler.getMatchInfo": {
 		"required uInt32 gameType": 1
 	},
 
-	"connector.lobbyHandler.startMatch": {
+	"connector.matchHandler.enterGoldRoom": {
 		"required uInt32 gameType": 1,
 		"required uInt32 stage": 2
 	},
