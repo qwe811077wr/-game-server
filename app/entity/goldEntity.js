@@ -144,9 +144,9 @@ pro._startGame = function () {
 
 	// 配牌
 	// cardData = [
-	// 	1, 45, 13, 60, 12, 10, 55, 23, 54, 37, 21, 52, 4, 19, 3,
-	// 	29, 44, 43, 11, 58, 26, 57, 25, 40, 24, 22, 6, 53, 36, 35,
-	// 	2, 28, 59, 27, 42, 41, 9, 56, 8, 39, 7, 38, 5, 20, 51,
+	// 	2, 60, 43, 11, 10, 41, 56, 40, 39, 54, 53, 21, 20, 4, 51,
+	// 	45, 29, 44, 28, 12, 59, 27, 26, 57, 9, 6, 37, 52, 36, 35,
+	// 	1, 13, 58, 42, 25, 24, 8, 55, 23, 7, 38, 22, 5, 19, 3,
 	// ];
 
 	// 发牌、排序
@@ -204,6 +204,7 @@ pro._getBankerUser = function(handCardData, cbCard)
 
 // 出牌(参数为空是托管AI出牌)
 pro.playCard = function(uid, bCardData, bCardCount, next) {
+	bCardData = bCardData.slice(0, bCardCount);
 	let cardInfo = this.roomInfo.cardInfo;
 	let playerCount = 3;
 	let wChairID = null;

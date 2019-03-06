@@ -243,34 +243,34 @@ pro.AISearchOutCard = function(handCardData, turnCardData, bNextWarn){
 			}
 		}
 		//机器人当庄,起手黑桃3
-		if (handCardCount == 15)
-		{
-			let i=0;
-			for ( ; i<OutCard.bCardCount; i++)
-			{
-				if (OutCard.bCardData[i] == 0x03)
-				{
-					break;
-				}
-			}
-			//没有黑桃3
-			if ( i == OutCard.bCardCount)
-			{
-				wSameCardNum = 0;
-				for(let i=0;i<handCardCount;i++)
-				{
-					if (0x03 == pdkHelper.GetCardLogicValue(handCardData[handCardCount-1-i]))
-						OutCard.bCardData[wSameCardNum++]= handCardData[handCardCount-1-i];
-					else break;
-				}
-				if (wSameCardNum==3)
-				{
-					OutCard.bCardData = OutCard.bCardData.slice(0, 2);
-					wSameCardNum = 2;
-				}
-				OutCard.bCardCount = wSameCardNum;
-			}
-		}
+		// if (handCardCount == 15)
+		// {
+		// 	let i=0;
+		// 	for ( ; i<OutCard.bCardCount; i++)
+		// 	{
+		// 		if (OutCard.bCardData[i] == 0x03)
+		// 		{
+		// 			break;
+		// 		}
+		// 	}
+		// 	//没有黑桃3
+		// 	if ( i == OutCard.bCardCount)
+		// 	{
+		// 		wSameCardNum = 0;
+		// 		for(let i=0;i<handCardCount;i++)
+		// 		{
+		// 			if (0x03 == pdkHelper.GetCardLogicValue(handCardData[handCardCount-1-i]))
+		// 				OutCard.bCardData[wSameCardNum++]= handCardData[handCardCount-1-i];
+		// 			else break;
+		// 		}
+		// 		if (wSameCardNum==3)
+		// 		{
+		// 			OutCard.bCardData = OutCard.bCardData.slice(0, 2);
+		// 			wSameCardNum = 2;
+		// 		}
+		// 		OutCard.bCardCount = wSameCardNum;
+		// 	}
+		// }
 		// m_pIAndroidUserItem->SendSocketData(REC_SUB_C_OUT_CART,&OutCard,sizeof(OutCard));
 		return OutCard;
 	}
