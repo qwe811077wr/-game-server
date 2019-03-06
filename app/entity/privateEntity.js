@@ -509,7 +509,7 @@ pro._broadcastHandCardMsg = function (uid) {
 	let route = 'onHandCardUser';
 	let msg = {
 		wChairID: wChairID,
-		handCardData: cardInfo.handCardData[wChairID]
+		handCardData: cardInfo.handCardData[wChairID] || []
 	};
 	let preServerID = this.preServerID[uid];
 	var uids = [{uid: uid, sid: preServerID}];

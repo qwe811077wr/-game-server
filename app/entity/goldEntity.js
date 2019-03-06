@@ -388,7 +388,7 @@ pro._broadcastHandCardMsg = function (uid) {
 	let route = 'onHandCardUser';
 	let msg = {
 		wChairID: wChairID,
-		handCardData: this.roomInfo.cardInfo.handCardData[wChairID]
+		handCardData: this.roomInfo.cardInfo.handCardData[wChairID] || []
 	};
 	this._notifyMsgToOtherMem(uid, route, msg);
 };
