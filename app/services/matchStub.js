@@ -66,7 +66,10 @@ pro.getMatchInfo = function (gameType, cb) {
 pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 	let self = this;
 	let goldRoomId = usrInfo.goldRoomId;
-	let roomInfo = this._findRoomInfo(gameType, stage, goldRoomId) || {};
+	let roomInfo = {};
+	if (goldRoomId != "0") {
+		roomInfo = this._findRoomInfoEx(goldRoomId) || {};
+	}
 	let toServerId = roomInfo.toServerId;
 	if (!toServerId) {
 		// 如果是机器人
@@ -97,7 +100,7 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 	let robotArr = this.robotList[gameType][stage]
 	if (!this._isInArray(usrInfo.id, robotArr)) {
 		robotArr.push(usrInfo);
-		logger.info('添加机器人:', usrInfo);
+		logger.info('添加机器人进列表:', usrInfo);
 	}
 };
 
@@ -105,7 +108,9 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 pro._spliceRobotToReadyList = function (gameType, stage) {
 	let robotArr = this.robotList[gameType][stage]
 	let robot = robotArr.splice(0, 1);
-	logger.info('移除机器人:', robot);
+	if (robot[0]) {
+		logger.info('自动分配机器人:', robot);
+	}
 	return robot[0];
 };
 
@@ -148,6 +153,23 @@ pro._findRoomInfo = function (gameType, stage, roomid) {
 	return roomInfo;
 };
 
+// 只有房间id查找
+pro._findRoomInfoEx = function (roomid) {
+	for (const idx in this.matchInfo) {
+		if (this.matchInfo.hasOwnProperty(idx)) {
+			const rooms = this.matchInfo[idx];
+			for (const id in rooms) {
+				if (rooms.hasOwnProperty(id)) {
+					const roomInfo = rooms[id];
+					if (roomInfo.roomid == roomid) {
+						return roomInfo;
+					}
+				}
+			}
+		}
+	}
+};
+
 // 开始匹配机器人
 pro._startMatchRobot = function (gameType, stage) {
 	let self = this;
@@ -164,7 +186,6 @@ pro._startMatchRobot = function (gameType, stage) {
 				return;
 			}
 			pomelo.app.rpc.table.goldRemote.joinGoldRoom.toServer(toServerId, roomid, usrInfo, function (resp) {
-				logger.info('加入机器人:', resp);
 				if (resp.code == consts.RoomCode.OK) {
 					let roomInfo = resp.roomInfo;
 					roomInfo.toServerId = toServerId;

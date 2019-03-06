@@ -400,6 +400,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	let cardInfo = this.roomInfo.cardInfo;
 	let players = this.roomInfo.players;
 	let playerCount = this.roomInfo.roomCfg.playerCount;
+	bCardData = bCardData.slice(0, bCardCount);
 
 	// 是否轮到出牌
 	if (wChairID != cardInfo.currentUser) {

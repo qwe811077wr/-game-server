@@ -10,7 +10,8 @@
 		"required uInt32 readyState": 8,
 		"optional uInt32 dissolveState": 9,
 		"optional string preSid": 10,
-		"optional uInt32 autoState": 11
+		"optional uInt32 autoState": 11,
+		"optional string openid": 12
 	},
 
 	"onLeaveRoom": {

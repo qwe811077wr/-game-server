@@ -86,7 +86,8 @@ pro.addUserToPlayers = function (usrInfo, chairID) {
 		chairID: chairID,
 		readyState: consts.ReadyState.Ready_No,
 		preSid: usrInfo.preSid,
-		autoState: consts.AutoState.AutoNo
+		autoState: consts.AutoState.AutoNo,
+		openid: usrInfo.openid
 	};
 	this.roomInfo.players.push(playerInfo);
 };
@@ -204,7 +205,6 @@ pro._getBankerUser = function(handCardData, cbCard)
 
 // 出牌(参数为空是托管AI出牌)
 pro.playCard = function(uid, bCardData, bCardCount, next) {
-	bCardData = bCardData.slice(0, bCardCount);
 	let cardInfo = this.roomInfo.cardInfo;
 	let playerCount = 3;
 	let wChairID = null;
@@ -227,6 +227,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		bCardData = outCard.bCardData;
 		bCardCount = outCard.bCardCount;
 	}
+	bCardData = bCardData.slice(0, bCardCount);
 
 	// 是否轮到出牌
 	if (wChairID != cardInfo.currentUser) {
