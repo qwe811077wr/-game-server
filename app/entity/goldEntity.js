@@ -350,6 +350,7 @@ pro._resetRoomData = function () {
 	this.roomInfo.cardInfo.turnUser = consts.InvalUser;
 	this.roomInfo.cardInfo.bUserWarn = [false, false, false];
 	this.setPlayerReadyState(null, consts.ReadyState.Ready_No);
+	this._setAutoState(null, consts.AutoState.AutoNo);
 };
 
 pro._getChairIDByUid = function (uid) {
@@ -483,7 +484,13 @@ pro._notifyMsgToOtherMem = function (uid, route, msg) {
 
 // 设置托管状态
 pro._setAutoState = function (wChairID, state) {
-	this.roomInfo.players[wChairID].autoState = state;
+	if (wChairID) {
+		this.roomInfo.players[wChairID].autoState = state;
+	} else {
+		for (let i = 0; i < this.roomInfo.players.length; i++) {
+			this.roomInfo.players[i].autoState = state;
+		}
+	}
 };
 
 // 得到托管状态
