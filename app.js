@@ -62,19 +62,8 @@ app.configure('production|development', 'gate', function () {
 });
 
 app.configure('production|development', function () {
-	// 性能问题注意权衡
-    if (app.enable('systemMonitor')) {
-		// 系统自带监听模块
-		app.enable('systemInfo');
-		app.enable('nodeInfo');
-		app.enable('monitorLog');
-		app.enable('scripts');
-		// app.registerAdmin(admin.modules.systemInfo);
-		// app.registerAdmin(admin.modules.nodeInfo);
-		// app.registerAdmin(admin.modules.monitorLog, {path: pathUtil.getLogPath(app.getBase())});
-		// app.registerAdmin(admin.modules.scripts, {app: app, path: pathUtil.getScriptPath(app.getBase())});
-
-		// 自定义监听模块
+	app.enable('systemMonitor');
+    if (typeof app.registerAdmin === 'function') {
         let onlineUser = require('./app/modules/onlineUser');
         app.registerAdmin(onlineUser, {app: app});
         let gameOperation = require('./app/modules/gameOperation');
