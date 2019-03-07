@@ -394,6 +394,16 @@ pro._getChairIDByUid = function (uid) {
 	}
 };
 
+pro._getUidByChairID = function (chairID) {
+	let players = this.roomInfo.players;
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
+		if (chairID == user.chairID) {
+			return user.id;
+		}
+	}
+};
+
 // 出牌
 pro.playCard = function(uid, bCardData, bCardCount, next) {
 	let wChairID = this._getChairIDByUid(uid);
@@ -406,7 +416,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	if (wChairID != cardInfo.currentUser) {
 		this.logger.warn('wChairID[%d] currentUser[%d] no equiel!',wChairID, cardInfo.currentUser);
 		next(null, {code: consts.PlayCardCode.NO_TURN_OUT_CARD});
-		this._broadcastHandCardMsg(uid);
+		this._broadcastHandCardMsg(wChairID);
 		return;
 	}
 
@@ -420,7 +430,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	if(bCardType == pdkHelper.CardType.CT_ERROR) 
 	{
 		next(null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
-		this._broadcastHandCardMsg(uid);
+		this._broadcastHandCardMsg(wChairID);
 		return;
 	}
 
@@ -432,14 +442,14 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		if (cardInfo.cardCount[wChairID] != bCardCount) {
 			if (pdkHelper.CompareCard(cardInfo.turnCardData,bCardData,cardInfo.turnCardCount,bCardCount)==false) {
 				next(null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
-				this._broadcastHandCardMsg(uid);
+				this._broadcastHandCardMsg(wChairID);
 				return;
 			}
 		} else {
 			if (pdkHelper.CompareLastCard(cardInfo.turnCardData,bCardData,cardInfo.turnCardCount,bCardCount)==false)
 			{
 				next(null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
-				this._broadcastHandCardMsg(uid);
+				this._broadcastHandCardMsg(wChairID);
 				return;
 			}
 		}
@@ -452,7 +462,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		if (pdkHelper.GetCardLogicValue(cardInfo.handCardData[wChairID][0]) != pdkHelper.GetCardLogicValue(bCardData[0]))
 		{
 			next(null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
-			this._broadcastHandCardMsg(uid);
+			this._broadcastHandCardMsg(wChairID);
 			return;
 		}
 	}
@@ -461,7 +471,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	if(pdkHelper.RemoveCard(bCardData,bCardCount,cardInfo.handCardData[wChairID],cardInfo.cardCount[wChairID]) == false)
 	{
 		next(null, {code: consts.PlayCardCode.REMOVE_CARD_ERROR});
-		this._broadcastHandCardMsg(uid);
+		this._broadcastHandCardMsg(wChairID);
 		this.logger.error(bCardData,bCardCount,cardInfo.handCardData[wChairID],cardInfo.cardCount[wChairID]);
 		return;
 	}
@@ -480,7 +490,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		cardInfo.currentUser = consts.InvalUser;
 
 	// 发送自己当前剩余手牌
-	this._broadcastHandCardMsg(uid);
+	this._broadcastHandCardMsg(wChairID);
 
 	// 报单消息
 	if (cardInfo.cardCount[wChairID]==1) {
@@ -504,8 +514,8 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 };
 
 // 推送玩家手牌消息
-pro._broadcastHandCardMsg = function (uid) {
-	let wChairID = this._getChairIDByUid(uid);
+pro._broadcastHandCardMsg = function (wChairID) {
+	let uid = this._getUidByChairID(wChairID);
 	let cardInfo = this.roomInfo.cardInfo;
 	let route = 'onHandCardUser';
 	let msg = {

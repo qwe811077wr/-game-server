@@ -12,6 +12,8 @@ let pdkHelper = require('../helper/pdkHelper');
 let utils = require('../util/utils');
 let pdkAIHelper = require('../helper/pdkAIHelper');
 
+let offset = 1.5;   // 客户端每回合动作表现时间
+
 let GoldEntity = function (opts) {
     opts = opts || {};
 	Entity.call(this, opts);
@@ -62,6 +64,16 @@ pro._getChairIDByUid = function (uid) {
 		const user = players[i];
 		if (uid == user.id) {
 			return user.chairID;
+		}
+	}
+};
+
+pro._getUidByChairID = function (chairID) {
+	let players = this.roomInfo.players;
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
+		if (chairID == user.chairID) {
+			return user.id;
 		}
 	}
 };
@@ -233,7 +245,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	if (wChairID != cardInfo.currentUser) {
 		this.logger.warn('wChairID[%d] currentUser[%d] no equiel!',wChairID, cardInfo.currentUser);
 		utils.invokeCallback(next, null, {code: consts.PlayCardCode.NO_TURN_OUT_CARD});
-		this._broadcastHandCardMsg(uid);
+		this._broadcastHandCardMsg(wChairID);
 		return;
 	}
 
@@ -247,7 +259,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	if(bCardType == pdkHelper.CardType.CT_ERROR) 
 	{
 		utils.invokeCallback(next, null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
-		this._broadcastHandCardMsg(uid);
+		this._broadcastHandCardMsg(wChairID);
 		return;
 	}
 
@@ -259,14 +271,14 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		if (cardInfo.cardCount[wChairID] != bCardCount) {
 			if (pdkHelper.CompareCard(cardInfo.turnCardData,bCardData,cardInfo.turnCardCount,bCardCount)==false) {
 				utils.invokeCallback(next, null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
-				this._broadcastHandCardMsg(uid);
+				this._broadcastHandCardMsg(wChairID);
 				return;
 			}
 		} else {
 			if (pdkHelper.CompareLastCard(cardInfo.turnCardData,bCardData,cardInfo.turnCardCount,bCardCount)==false)
 			{
 				utils.invokeCallback(next, null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
-				this._broadcastHandCardMsg(uid);
+				this._broadcastHandCardMsg(wChairID);
 				return;
 			}
 		}
@@ -279,7 +291,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		if (pdkHelper.GetCardLogicValue(cardInfo.handCardData[wChairID][0]) != pdkHelper.GetCardLogicValue(bCardData[0]))
 		{
 			utils.invokeCallback(next, null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
-			this._broadcastHandCardMsg(uid);
+			this._broadcastHandCardMsg(wChairID);
 			return;
 		}
 	}
@@ -288,7 +300,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	if(pdkHelper.RemoveCard(bCardData,bCardCount,cardInfo.handCardData[wChairID],cardInfo.cardCount[wChairID]) == false)
 	{
 		utils.invokeCallback(next, null, {code: consts.PlayCardCode.REMOVE_CARD_ERROR});
-		this._broadcastHandCardMsg(uid);
+		this._broadcastHandCardMsg(wChairID);
 		this.logger.error(bCardData,bCardCount,cardInfo.handCardData[wChairID],cardInfo.cardCount[wChairID]);
 		return;
 	}
@@ -307,7 +319,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		cardInfo.currentUser = consts.InvalUser;
 
 	// 发送自己当前剩余手牌
-	this._broadcastHandCardMsg(uid);
+	this._broadcastHandCardMsg(wChairID);
 
 	// 报单消息
 	if (cardInfo.cardCount[wChairID]==1) {
@@ -380,12 +392,8 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 };
 
 // 推送玩家手牌消息
-pro._broadcastHandCardMsg = function (uid) {
-	if (!uid) {
-		return;
-	}
-
-	let wChairID = this._getChairIDByUid(uid);
+pro._broadcastHandCardMsg = function (wChairID) {
+	let uid = this._getUidByChairID(wChairID);
 	let route = 'onHandCardUser';
 	let msg = {
 		wChairID: wChairID,
@@ -487,6 +495,7 @@ pro._getAutoState = function (wChairID) {
 pro._resetAutoSchedule = function (dt) {
 	let self = this;
 	dt = dt || 15;  // 默认15s自动托管
+	dt = dt + offset;
 	self._clearAutoSchedul();
 	
 	let wChairID = this.roomInfo.cardInfo.currentUser;
@@ -496,7 +505,7 @@ pro._resetAutoSchedule = function (dt) {
 
 	// 已经托管不能直接调用playCard，要有延时(TODO:原因以后研究...)
 	if (self._getAutoState(wChairID) == consts.AutoState.AutoYes) {
-		dt = 2;
+		dt = 1;
 	}
 
 	self.autoSchedule = setInterval(function () {
