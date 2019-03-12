@@ -9,5 +9,6 @@
 	"onOutCard",
 	"onPassCard",
 	"onSettlement",
-	"onAutoCard"
+	"onAutoCard",
+	"onOutCardNotify"
 ]

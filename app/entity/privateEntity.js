@@ -511,6 +511,9 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		// 要不起自动下一手
 		this._checkNextOutCard(wChairID, cardInfo.currentUser);
 	}
+
+	// 刷新闹钟提示
+	this._broadcastOutCardNotify(cardInfo.currentUser);
 };
 
 // 推送玩家手牌消息
@@ -556,6 +559,16 @@ pro._broadcastPassCardMsg = function (wPassUser, currentUser) {
 	let msg = {
 		wPassUser: wPassUser,
 		wCurrentUser: currentUser,
+	}
+	let players = this.roomInfo.players;
+	this._notifyMsgToOtherMem(null, players, route, msg);
+};
+
+// 当前出牌提示
+pro._broadcastOutCardNotify = function (currentUser) {
+	let route = 'onOutCardNotify'
+	let msg = {
+		currentUser: currentUser,
 	}
 	let players = this.roomInfo.players;
 	this._notifyMsgToOtherMem(null, players, route, msg);

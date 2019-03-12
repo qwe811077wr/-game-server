@@ -340,6 +340,9 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		// 要不起自动下一手
 		this._checkNextOutCard(wChairID, cardInfo.currentUser);
 	}
+
+	// 刷新闹钟提示
+	this._broadcastOutCardNotify(cardInfo.currentUser);
 };
 
 // 重置房间数据
@@ -458,6 +461,15 @@ pro._broadcastAutoCardMsg = function (wAutoUser, bAuto) {
 		// 自动出牌
 		this.playCard();
 	}
+};
+
+// 当前出牌提示
+pro._broadcastOutCardNotify = function (currentUser) {
+	let route = 'onOutCardNotify'
+	let msg = {
+		currentUser: currentUser,
+	}
+	this._notifyMsgToOtherMem(null, route, msg);
 };
 
 // uid 为空向队伍里所有人推送, 否则指定uid推送
