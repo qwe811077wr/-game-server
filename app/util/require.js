@@ -4,8 +4,6 @@ const path = require('path');
 const realTimeReload = false;
 // 热更路径
 const HOT_REQUIRE_PRE_PATH = path.resolve(__dirname, '..');
-// 表格路径
-const TABLE_PATH = path.resolve(__dirname, '../data/');
 // 定义不需要更新的模块
 const ignoreModule = new Set([
     // 'entity',
@@ -105,10 +103,14 @@ function cleanModule(moduleId) {
 }
 
 
-function checkAndUpdate(moduleId) {
-    // 目前只更新类函数(包括表格)
+function checkAndUpdate(moduleId, isOnly) {
     var moduleCache = hotModuleCache[moduleId];
-    if ( typeof moduleCache === 'function' || moduleId.startsWith(TABLE_PATH) ) {
+    if (!moduleCache) {
+        return;
+    }
+
+     // 目前只更新类函数(局部变量会被刷新) 或指定的特定文件
+    if ( typeof moduleCache === 'function' || isOnly ) {
         cleanModule(moduleId);
 
         try {
@@ -166,9 +168,19 @@ const _require = function( modulePath ) {
 }
 
 // 主动热更
-var _reload = function () {
-    for (var moduleId in hotModuleCache) {
-        checkAndUpdate(moduleId);
+var _reload = function (hotFile) {
+    if (hotFile) {
+        for (const moduleId in hotModuleCache) {
+            let fileName =  path.basename(moduleId);
+            if (fileName === hotFile) {
+                checkAndUpdate(moduleId, true);
+                break;
+            }
+        }
+    } else {
+        for (var moduleId in hotModuleCache) {
+            checkAndUpdate(moduleId);
+        }
     }
 }
 

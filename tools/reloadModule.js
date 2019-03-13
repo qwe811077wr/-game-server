@@ -34,7 +34,7 @@ function connectToMaster(id, opts, cb) {
 function reload(opts) {
     var id = 'pomelo_reload_' + Date.now();
     connectToMaster(id, opts, function(client) {
-        client.request(co.moduleId, { signal: 'reload', args: opts.args }, function(err) {
+        client.request(co.moduleId, { signal: 'reload', hotFile: opts.hotFile }, function(err) {
             if(err) {
                 console.error(err);
             }
@@ -48,9 +48,10 @@ function reload(opts) {
 
 var arguments = process.argv.splice(2);
 var opts = {};
-opts.username = arguments[0] || DEFAULT_USERNAME;
-opts.password = arguments[1] || DEFAULT_PWD;
-opts.host = arguments[2] || DEFAULT_MASTER_HOST;
-opts.port = arguments[3] || DEFAULT_MASTER_PORT;
+opts.hotFile = arguments[0],
+opts.username = arguments[1] || DEFAULT_USERNAME;
+opts.password = arguments[2] || DEFAULT_PWD;
+opts.host = arguments[3] || DEFAULT_MASTER_HOST;
+opts.port = arguments[4] || DEFAULT_MASTER_PORT;
 
 reload(opts);
