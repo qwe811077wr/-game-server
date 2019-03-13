@@ -7,7 +7,7 @@ let countDownLatch = require('../../node_modules/pomelo/lib/util/countDownLatch'
 let utils = require('../../node_modules/pomelo/lib/util/utils');
 let Constants = require('../../node_modules/pomelo/lib/util/constants');
 let logger = require('pomelo-logger').getLogger('game', __filename);
-let entityMgr = require('../services/entityManager');
+let entityMgr = _require('../services/entityManager');
 
 module.exports = function (opts) {
     return new Module(opts);

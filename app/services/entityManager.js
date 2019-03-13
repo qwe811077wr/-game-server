@@ -4,7 +4,7 @@
  * Description: 所有Entity的管理器
  */
 var logger = require('pomelo-logger').getLogger('game', __filename);
-var utils = require('../util/utils');
+var utils = _require('../util/utils');
 
 var entities = {}
 var entitiesClassify = {}

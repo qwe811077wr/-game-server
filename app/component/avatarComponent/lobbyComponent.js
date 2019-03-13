@@ -4,11 +4,11 @@
  * Description:
  */
 let pomelo = require('pomelo');
-let Component = require('../component');
 let util = require('util');
-let consts = require('../../common/consts');
-let messageService = require('../../services/messageService');
-var dispatcher = require('../../util/dispatcher');
+let Component = _require('../component');
+let consts = _require('../../common/consts');
+let messageService = _require('../../services/messageService');
+var dispatcher = _require('../../util/dispatcher');
 
 let LobbyComponent = function (entity) {
     Component.call(this, entity);

@@ -1,7 +1,7 @@
 var assert = require('assert');
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
-var schemaConfig = require('./schemaConfig')
+var schemaConfig = _require('./schemaConfig')
 
 
 var uri = null;

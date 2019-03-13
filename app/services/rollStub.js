@@ -3,8 +3,8 @@
  * Author: admin
  * Description:
  */
-var consts = require('../common/consts');
-var utils = require('../util/utils')
+var consts = _require('../common/consts');
+var utils = _require('../util/utils')
 var logger = require('pomelo-logger').getLogger('game', '__filename');
 
 var instance = null;

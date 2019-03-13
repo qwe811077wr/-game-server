@@ -3,10 +3,10 @@
  * Author: admin
  * Description: 负责component注册
  */
-var LoggerComponent = require('./entityComponent/loggerComponent');
-let AvatarPropertyCtrl = require('./avatarComponent/avatarPropertyCtrl');
-let LobbyComponent = require('./avatarComponent/lobbyComponent');
-let MatchComponent = require('./avatarComponent/matchComponent');
+var LoggerComponent = _require('./entityComponent/loggerComponent');
+let AvatarPropertyCtrl = _require('./avatarComponent/avatarPropertyCtrl');
+let LobbyComponent = _require('./avatarComponent/lobbyComponent');
+let MatchComponent = _require('./avatarComponent/matchComponent');
 
 var componentClass = {
 	logger: LoggerComponent,

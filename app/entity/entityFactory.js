@@ -3,9 +3,9 @@
  * Author: admin
  * Description:
  */
-var Avatar = require("./avatar")
-var PrivateEntity = require("./privateEntity");
-var GoldEntity = require("./goldEntity");
+var Avatar = _require("./avatar")
+var PrivateEntity = _require("./privateEntity");
+var GoldEntity = _require("./goldEntity");
 
 var entityClasses = {
 	Avatar: Avatar,

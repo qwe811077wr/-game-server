@@ -5,12 +5,12 @@
  */
 let pomelo = require('pomelo');
 let util = require('util');
-let Entity = require('./entity');
-let consts = require('../common/consts');
-let messageService = require('../services/messageService');
-let pdkHelper = require('../helper/pdkHelper');
-let utils = require('../util/utils');
-let pdkAIHelper = require('../helper/pdkAIHelper');
+let Entity = _require('./entity');
+let consts = _require('../common/consts');
+let messageService = _require('../services/messageService');
+let pdkHelper = _require('../helper/pdkHelper');
+let utils = _require('../util/utils');
+let pdkAIHelper = _require('../helper/pdkAIHelper');
 
 let offset = 1.5;   // 客户端每回合动作表现时间
 

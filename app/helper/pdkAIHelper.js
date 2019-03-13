@@ -1,5 +1,5 @@
 
-var pdkHelper = require('../helper/pdkHelper');
+var pdkHelper = _require('../helper/pdkHelper');
 var pro = module.exports;
 
 //扑克类型

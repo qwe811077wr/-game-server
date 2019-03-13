@@ -5,9 +5,9 @@
  */
 var pomelo = require('pomelo');
 var util = require('util');
-var Entity = require('./entity');
-var messageService = require('../services/messageService');
-var consts = require('../common/consts');
+var Entity = _require('./entity');
+var messageService = _require('../services/messageService');
+var consts = _require('../common/consts');
 
 var AUTO_SAVE_TICK = 1000 * 60 * 5  // 自动存盘时间
 

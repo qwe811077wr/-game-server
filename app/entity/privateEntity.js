@@ -5,11 +5,11 @@
  */
 let pomelo = require('pomelo');
 let util = require('util');
-let Entity = require('./entity');
-let consts = require('../common/consts');
-let pdkHelper = require('../helper/pdkHelper');
-let messageService = require('../services/messageService');
-let utils = require('../util/utils');
+let Entity = _require('./entity');
+let consts = _require('../common/consts');
+let pdkHelper = _require('../helper/pdkHelper');
+let messageService = _require('../services/messageService');
+let utils = _require('../util/utils');
 
 let PrivateEntity = function (opts) {
     opts = opts || {};

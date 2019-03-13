@@ -6,9 +6,9 @@
  */
 let pomelo = require('pomelo');
 var logger = require('pomelo-logger').getLogger('game', 'matchStub');
-var consts = require('../common/consts');
-var dispatcher = require('../util/dispatcher');
-let messageService = require('../services/messageService');
+var consts = _require('../common/consts');
+var dispatcher = _require('../util/dispatcher');
+let messageService = _require('../services/messageService');
 
 var instance = null;
 

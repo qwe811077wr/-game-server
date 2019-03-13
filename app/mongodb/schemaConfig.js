@@ -3,7 +3,7 @@
  * Author: admin
  * Description:
  */
-let avatarSchema = require('./schemas/avatarSchema');
+let avatarSchema = _require('./schemas/avatarSchema');
 
 let name2Schema = {
     "Avatar": avatarSchema,

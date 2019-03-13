@@ -4,7 +4,7 @@
  * Description: 游戏辅助函数
  */
 
-var consts = require('../common/consts');
+var consts = _require('../common/consts');
 var exp = module.exports;
 
 //扑克数据

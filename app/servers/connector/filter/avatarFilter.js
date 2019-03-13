@@ -3,7 +3,7 @@
  * Author: admin
  * Description:
  */
-var entityManager = require('../../../services/entityManager');
+var entityManager = _require('../../../services/entityManager');
 
 module.exports = function() {
     return new Filter();

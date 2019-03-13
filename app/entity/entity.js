@@ -7,10 +7,10 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var ObjectId = require('mongoose').Types.ObjectId;
-var entityManager = require('../services/entityManager');
-var componentRegister = require('../component/componentRegister');
-var utils = require('../util/utils');
-var consts = require('../common/consts');
+var entityManager = _require('../services/entityManager');
+var componentRegister = _require('../component/componentRegister');
+var utils = _require('../util/utils');
+var consts = _require('../common/consts');
 
 var Entity = function (opts) {
     opts = opts || {};

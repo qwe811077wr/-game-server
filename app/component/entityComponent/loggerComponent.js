@@ -3,9 +3,9 @@
  * Author: admin
  * Description: logger做一层wrapper，减少pomelo-logger实例数量
  */
-var Component = require('../component');
 var util = require('util');
 var logger = require('pomelo-logger').getLogger('game');
+var Component = _require('../component');
 
 var LoggerComponent = function (entity) {
     Component.call(this, entity);

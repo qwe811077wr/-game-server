@@ -1,8 +1,8 @@
-var consts = require('../../../common/consts');
+var consts = _require('../../../common/consts');
 var fly = require('flyio');
 var logger = require('pomelo-logger').getLogger('game', __filename);
-var entityManager = require('../../../services/entityManager');
-var entityFactory = require('../../../entity/entityFactory');
+var entityManager = _require('../../../services/entityManager');
+var entityFactory = _require('../../../entity/entityFactory');
 
 module.exports = function (app) {
     return new Handler(app);

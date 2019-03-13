@@ -1,15 +1,13 @@
 var reload = require('./app/util/require');
 var pomelo = require('pomelo');
-let fs = require('fs'), path = require('path');
-
+var fs = require('fs'), path = require('path');
 var mongodb = require("./app/mongodb/mongodb");
-var routeUtil = require('./app/util/routeUtil');
-var CenterStub = require('./app/services/centerStub');
-var RollStub = require('./app/services/rollStub');
-var MatchStub = require('./app/services/matchStub');
-
-let avatarFilter = require('./app/servers/connector/filter/avatarFilter');
-let tableFilter = require('./app/servers/table/filter/tableFilter');
+let routeUtil = _require('./app/util/routeUtil');
+let CenterStub = _require('./app/services/centerStub');
+let RollStub = _require('./app/services/rollStub');
+let MatchStub = _require('./app/services/matchStub');
+let avatarFilter = _require('./app/servers/connector/filter/avatarFilter');
+let tableFilter = _require('./app/servers/table/filter/tableFilter');
 
 /**
  * Init app for client.
@@ -66,9 +64,9 @@ app.configure('production|development', 'gate', function () {
 app.configure('production|development', function () {
 	app.enable('systemMonitor');
     if (typeof app.registerAdmin === 'function') {
-        let onlineUser = require('./app/modules/onlineUser');
+        let onlineUser = _require('./app/modules/onlineUser');
         app.registerAdmin(onlineUser, {app: app});
-        let gameOperation = require('./app/modules/gameOperation');
+        let gameOperation = _require('./app/modules/gameOperation');
         app.registerAdmin(gameOperation, {app: app});
     }
 	
@@ -80,13 +78,13 @@ app.configure('production|development', function () {
 	// handler 热更新开关
     app.set('serverConfig',
 	{
-		reloadHandlers: false
+		reloadHandlers: true
 	});
 
     // remote 热更新开关
     app.set('remoteConfig',
 	{
-		reloadRemotes: false
+		reloadRemotes: true
 	});
 });
 
