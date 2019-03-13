@@ -1,3 +1,4 @@
+var reload = require('./app/util/require');
 var pomelo = require('pomelo');
 let fs = require('fs'), path = require('path');
 
@@ -15,6 +16,7 @@ let tableFilter = require('./app/servers/table/filter/tableFilter');
  */
 var app = pomelo.createApp();
 app.set('name', 'kzyx');
+app.set('reload', reload, true);
 
 var initDB = function (app) {
     app.loadConfig('mongodb', app.getBase() + '/config/mongodb.json');
@@ -73,7 +75,19 @@ app.configure('production|development', function () {
 	app.route('table', routeUtil.table);
 	initDB(app);
     // message缓冲
-    app.set('pushSchedulerConfig', {scheduler: pomelo.pushSchedulers.buffer, flushInterval: 20});
+	app.set('pushSchedulerConfig', {scheduler: pomelo.pushSchedulers.buffer, flushInterval: 20});
+	
+	// handler 热更新开关
+    app.set('serverConfig',
+	{
+		reloadHandlers: false
+	});
+
+    // remote 热更新开关
+    app.set('remoteConfig',
+	{
+		reloadRemotes: false
+	});
 });
 
 app.configure('production|development', 'auth', function () {
