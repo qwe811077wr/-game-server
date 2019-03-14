@@ -354,6 +354,7 @@ pro._resetRoomData = function () {
 	this.roomInfo.cardInfo.bUserWarn = [false, false, false];
 	this.setPlayerReadyState(null, consts.ReadyState.Ready_No);
 	this._setAutoState(null, consts.AutoState.AutoNo);
+	this._clearAutoSchedul();
 };
 
 pro._getChairIDByUid = function (uid) {
