@@ -97,8 +97,21 @@ pro.clientLoginInfo = function () {
         coins: this.coins,
 		gems: this.gems,
 		roomid: this.roomid,
-		goldRoomId: this.goldRoomId,
+        goldRoomId: this.goldRoomId,
+        offlineCoins: this._getCoinsByOffline(),
     }
+};
+
+// 离线所得金币
+pro._getCoinsByOffline = function () {
+	if (this.lastOfflineTime === 0) {
+		return 0;
+	}
+
+	// 1 c/s
+	let offlineCoins = Math.ceil(Date.now()/1000) - this.lastOfflineTime;
+	this.coins = this.coins + offlineCoins;
+	return offlineCoins;
 };
 
 // 增加session setting
@@ -205,6 +218,7 @@ pro.destroy = function (cb) {
     var self = this;
     self.emit('EventDestory', this);
     pomelo.app.rpc.auth.authRemote.checkout(null, self.openid, self.uid, null);
+    self.lastOfflineTime = Math.ceil(Date.now()/1000);
     // 存盘
     clearInterval(self.dbTimer);
     self.dbTimer = null;

@@ -11,7 +11,8 @@ var AvatarSchema = new Schema({
     coins: Number,
     gems: Number,
 	roomid: Number,
-	goldRoomId: String,
+    goldRoomId: String,
+    lastOfflineTime: Number,
 });
 
 AvatarSchema.set('toObject', { getters: true });
