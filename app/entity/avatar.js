@@ -29,6 +29,9 @@ var Avatar = function (opts) {
     }.bind(this), AUTO_SAVE_TICK);  // 自动存盘
 
     pomelo.app.rpc.auth.authRemote.checkin(null, this.openid, this.id, pomelo.app.getServerId(), null);
+
+    // 离线获取金币
+    this.offlineCoins = this._getCoinsByOffline();
 };
 
 util.inherits(Avatar, Entity);
@@ -56,6 +59,18 @@ pro.updateUserRoomId = function (roomid) {
 
 pro.updateUserGoldRoomid = function (goldRoomId) {
     this.goldRoomId = goldRoomId;
+};
+
+// 离线所得金币
+pro._getCoinsByOffline = function () {
+	if (this.lastOfflineTime === 0) {
+		return 0;
+	}
+
+	// 1 c/s
+    let offlineCoins = Math.ceil(Date.now()/1000) - this.lastOfflineTime;
+    this.coins = this.coins + offlineCoins;
+	return offlineCoins;
 };
 
 // 存盘信息更新
@@ -95,23 +110,11 @@ pro.clientLoginInfo = function () {
         gender: this.gender,
         avatarUrl: this.avatarUrl,
         coins: this.coins,
+        offlineCoins: this.offlineCoins,
 		gems: this.gems,
 		roomid: this.roomid,
         goldRoomId: this.goldRoomId,
-        offlineCoins: this._getCoinsByOffline(),
     }
-};
-
-// 离线所得金币
-pro._getCoinsByOffline = function () {
-	if (this.lastOfflineTime === 0) {
-		return 0;
-	}
-
-	// 1 c/s
-	let offlineCoins = Math.ceil(Date.now()/1000) - this.lastOfflineTime;
-	this.coins = this.coins + offlineCoins;
-	return offlineCoins;
 };
 
 // 增加session setting
@@ -213,12 +216,14 @@ pro.kickOffline = function (reason, rightNow) {
 
 // 销毁
 pro.destroy = function (cb) {
+    this.lastOfflineTime = Math.ceil(Date.now()/1000);
+
     // todo: 先放这里，后续可能会有其他登出流程
     this.emit("EventLogout", this);
     var self = this;
     self.emit('EventDestory', this);
     pomelo.app.rpc.auth.authRemote.checkout(null, self.openid, self.uid, null);
-    self.lastOfflineTime = Math.ceil(Date.now()/1000);
+    
     // 存盘
     clearInterval(self.dbTimer);
     self.dbTimer = null;
