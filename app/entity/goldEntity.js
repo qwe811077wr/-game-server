@@ -1,12 +1,12 @@
 /**
  * Date: 2019/2/21
  * Author: admin
- * Description: 跑得快15张牌桌管理
+ * Description: 跑得快牌桌管理
  */
 let pomelo = require('pomelo');
 let util = require('util');
 let Entity = _require('./entity');
-let consts = _require('../common/consts');
+let consts = require('../common/consts');
 let messageService = _require('../services/messageService');
 let pdkHelper = _require('../helper/pdkHelper');
 let utils = _require('../util/utils');
@@ -19,7 +19,7 @@ let GoldEntity = function (opts) {
 	Entity.call(this, opts);
 	this.autoSchedule = null; // 托管定时器
 	this.roomInfo = {};  // 房间信息
-	this.initGoldRoom(opts.usrInfo, opts.stage);
+	this.initGoldRoom(opts.usrInfo, opts.gameType, opts.stage);
 };
 
 util.inherits(GoldEntity, Entity);
@@ -27,13 +27,13 @@ module.exports = GoldEntity;
 
 let pro = GoldEntity.prototype;
 
-pro.initGoldRoom = function (usrInfo, stage) {
+pro.initGoldRoom = function (usrInfo, gameType, stage) {
     this.roomInfo = {
         roomid: this.id,
 		creator: usrInfo.id,
 		createTime: Math.ceil(Date.now()/1000),
 		status: consts.TableStatus.INIT,
-		gameType: consts.GameType.PDK_15,
+		gameType: gameType || consts.GameType.PDK_16,
 		stage: stage,
 		players: [],
 		//游戏开始卡牌信息
@@ -48,6 +48,12 @@ pro.initGoldRoom = function (usrInfo, stage) {
 		},
 	};
 	this.addUserToPlayers(usrInfo, 0);
+
+	if (gameType == consts.GameType.PDK_15) {
+		this.roomInfo.maxCardCount = 15;
+	} else {
+		this.roomInfo.maxCardCount = 16;
+	}
 };
 
 // 进入房间返回客户端数据
@@ -153,7 +159,7 @@ pro.getPlayerReadyCount = function () {
 pro._startGame = function () {
 	this.roomInfo.status = consts.TableStatus.START;
 	// 洗牌
-	let cardData = pdkHelper.RandCardList();
+	let cardData = pdkHelper.RandCardList(this.roomInfo.gameType);
 
 	// 配牌
 	// cardData = [
@@ -166,12 +172,12 @@ pro._startGame = function () {
 	var handCardData = [];
 	var pos = 0
 	for (let i = 0; i < 3; i++) {
-		let carditem = cardData.slice(pos, pos + consts.MaxCardCount);
+		let carditem = cardData.slice(pos, pos + this.roomInfo.maxCardCount);
 		handCardData.push(carditem);
-		pos = pos + consts.MaxCardCount;
-		pdkHelper.SortCardList(handCardData[i], consts.MaxCardCount);
+		pos = pos + this.roomInfo.maxCardCount;
+		pdkHelper.SortCardList(handCardData[i], this.roomInfo.maxCardCount);
 		this.roomInfo.cardInfo.handCardData[i] = carditem;
-		this.roomInfo.cardInfo.cardCount[i] = consts.MaxCardCount;
+		this.roomInfo.cardInfo.cardCount[i] = this.roomInfo.maxCardCount;
 	}
 	this.logger.info('玩家手牌数据:', handCardData);
 
@@ -204,7 +210,7 @@ pro._getBankerUser = function(handCardData, cbCard)
 {
 	for (let i =0;i < 3;i++)
 	{
-		for (let j =0; j < consts.MaxCardCount;j++)
+		for (let j =0; j < this.roomInfo.maxCardCount;j++)
 		{
 			if (handCardData[i][j] == cbCard)
 			{

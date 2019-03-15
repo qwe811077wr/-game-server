@@ -6,7 +6,7 @@
 let util = require('util');
 let Component = _require('../component');
 let avatarProperty = _require('./avatarProperty');
-let consts = _require('../../common/consts');
+let consts = require('../../common/consts');
 
 let AvatarPropertyCtrl = function (entity) {
     Component.call(this, entity);

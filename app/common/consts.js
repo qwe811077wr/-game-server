@@ -19,10 +19,10 @@ module.exports = {
         WECHAT: "wechat",
 	},
 
-	MaxCardCount: 15,      //手牌最大数量
 	AutoDissolveTime: 60,  //自动解散时间
 	InvalUser: 65535, 	   //无效用户
-	PdkStageCount: 3,  	   // 跑得快阶梯数量
+	Pdk15StageCount: 3,    // 跑得快15阶梯数量
+	Pdk16StageCount: 3,    // 跑得快16阶梯数量
 	
 /* *************************  code begin  ************************* */
 
@@ -114,5 +114,6 @@ module.exports = {
 	// 游戏类型
 	GameType: {
 		PDK_15: 1,  // 跑得快15张
+		PDK_16: 2,  // 跑得快16张
 	}
 }

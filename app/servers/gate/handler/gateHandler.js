@@ -1,5 +1,5 @@
 var dispatcher = _require('../../../util/dispatcher');
-var consts = _require('../../../common/consts');
+var consts = require('../../../common/consts');
 
 module.exports = function (app) {
     return new Handler(app);

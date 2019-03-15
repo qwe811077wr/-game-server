@@ -1,6 +1,6 @@
 var entityFactory = _require('../../../entity/entityFactory');
 var entityManager = _require('../../../services/entityManager');
-var consts = _require('../../../common/consts');
+var consts = require('../../../common/consts');
 
 module.exports = function (app) {
 	return new Remote(app);

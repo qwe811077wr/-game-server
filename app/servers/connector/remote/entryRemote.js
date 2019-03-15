@@ -6,7 +6,7 @@
 let pomelo = require('pomelo');
 var entityManager = _require('../../../services/entityManager');
 var logger = require('pomelo-logger').getLogger('game', __filename);
-var consts = _require('../../../common/consts');
+var consts = require('../../../common/consts');
 
 module.exports = function(app) {
     return new Remote(app);

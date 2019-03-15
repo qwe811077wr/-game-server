@@ -1,4 +1,4 @@
-var consts = _require('../../../common/consts');
+var consts = require('../../../common/consts');
 var fly = require('flyio');
 var logger = require('pomelo-logger').getLogger('game', __filename);
 var entityManager = _require('../../../services/entityManager');

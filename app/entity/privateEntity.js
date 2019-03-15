@@ -1,12 +1,12 @@
 /**
  * Date: 2019/2/16
  * Author: admin
- * Description: 牌桌管理
+ * Description: 牌桌管理(todo: 私人场暂时默认15张玩法)
  */
 let pomelo = require('pomelo');
 let util = require('util');
 let Entity = _require('./entity');
-let consts = _require('../common/consts');
+let consts = require('../common/consts');
 let pdkHelper = _require('../helper/pdkHelper');
 let messageService = _require('../services/messageService');
 let utils = _require('../util/utils');
@@ -52,6 +52,7 @@ pro.initPdkRoom = function (preSid, usrInfo, roomCfg) {
 		},
 	};
 	this.addUserToPlayers(preSid, usrInfo, 0);
+	this.roomInfo.maxCardCount = 15;
 
 	// 同步中心服
 	let roomid = this.id;
@@ -206,7 +207,7 @@ pro._startGame = function () {
 	this.roomInfo.status = consts.TableStatus.START;
 
 	// 洗牌
-	let cardData = pdkHelper.RandCardList();
+	let cardData = pdkHelper.RandCardList(consts.GameType.PDK_15);
 
 	// 配牌
 	// cardData = [
@@ -219,12 +220,12 @@ pro._startGame = function () {
 	var handCardData = [];
 	var pos = 0
 	for (let i = 0; i < this.roomCfg.playerCount; i++) {
-		let carditem = cardData.slice(pos, pos + consts.MaxCardCount);
+		let carditem = cardData.slice(pos, pos + this.roomInfo.maxCardCount);
 		handCardData.push(carditem);
-		pos = pos + consts.MaxCardCount;
-		pdkHelper.SortCardList(handCardData[i], consts.MaxCardCount);
+		pos = pos + this.roomInfo.maxCardCount;
+		pdkHelper.SortCardList(handCardData[i], this.roomInfo.maxCardCount);
 		this.roomInfo.cardInfo.handCardData[i] = carditem;
-		this.roomInfo.cardInfo.cardCount[i] = consts.MaxCardCount;
+		this.roomInfo.cardInfo.cardCount[i] = this.roomInfo.maxCardCount;
 	}
 	this.logger.info('玩家手牌数据:', handCardData);
 
@@ -630,7 +631,7 @@ pro._getBankerUser = function(handCardData, cbCard)
 	let playerCount = this.roomCfg.playerCount;
 	for (let i =0;i < playerCount;i++)
 	{
-		for (let j =0; j < consts.MaxCardCount;j++)
+		for (let j =0; j < this.roomInfo.maxCardCount;j++)
 		{
 			if (handCardData[i][j] == cbCard)
 			{

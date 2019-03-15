@@ -6,7 +6,7 @@
 let pomelo = require('pomelo');
 let util = require('util');
 let Component = _require('../component');
-let consts = _require('../../common/consts');
+let consts = require('../../common/consts');
 
 let LobbyComponent = function (entity) {
     Component.call(this, entity);
@@ -47,8 +47,10 @@ pro.enterGoldRoom = function (gameType, stage, next) {
 };
 
 pro._checkValid = function (gameType, stage) {
-	if (gameType == consts.GameType.PDK_15 && stage >= 0 && stage < consts.PdkStageCount) {
-		return true
+	if (gameType == consts.GameType.PDK_15 && stage >= 0 && stage < consts.Pdk15StageCount) {
+		return true;
+	} else if (gameType == consts.GameType.PDK_16 && stage >= 0 && stage < consts.Pdk16StageCount) {
+		return true;
 	}
 	return false;
 };

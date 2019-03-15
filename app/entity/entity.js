@@ -10,7 +10,7 @@ var ObjectId = require('mongoose').Types.ObjectId;
 var entityManager = _require('../services/entityManager');
 var componentRegister = _require('../component/componentRegister');
 var utils = _require('../util/utils');
-var consts = _require('../common/consts');
+var consts = require('../common/consts');
 
 var Entity = function (opts) {
     opts = opts || {};
