@@ -27,7 +27,7 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 			return;
 		}
 	}
-
+	goldEntity.updateUserToPlayers(usrInfo);
 	cb({
 		code: consts.RoomCode.OK,
 		roomInfo: goldEntity.clientEnterInfo(usrInfo.id)
@@ -38,6 +38,7 @@ pro.joinGoldRoom = function (roomid, usrInfo, cb) {
 	let resp = {};
 	let goldEntity = entityManager.getEntity(roomid);
 	if (goldEntity) {
+		goldEntity.updateUserToPlayers(usrInfo);
 		if (usrInfo.goldRoomId === roomid) {
 			// 已经在房间里
 			resp["code"] = consts.RoomCode.OK;

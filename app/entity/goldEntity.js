@@ -110,6 +110,17 @@ pro.addUserToPlayers = function (usrInfo, chairID) {
 	this.roomInfo.players.push(playerInfo);
 };
 
+pro.updateUserToPlayers = function (usrInfo) {
+	for (let i = 0; i < this.roomInfo.players.length; i++) {
+		let user = this.roomInfo.players[i];
+		if (user.id == usrInfo.id) {
+			user.coins = usrInfo.coins;
+			user.gems = usrInfo.gems;
+			break;
+		}
+	}
+};
+
 pro.readyGame = function (uid, next) {
 	let roomState = this.roomInfo.status;
 	if (roomState == consts.TableStatus.START) {
@@ -361,16 +372,6 @@ pro._resetRoomData = function () {
 	this.setPlayerReadyState(null, consts.ReadyState.Ready_No);
 	this._setAutoState(null, consts.AutoState.AutoNo);
 	this._clearAutoSchedul();
-};
-
-pro._getChairIDByUid = function (uid) {
-	let players = this.roomInfo.players;
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-		if (uid == user.id) {
-			return user.chairID;
-		}
-	}
 };
 
 // 要不起自动下手

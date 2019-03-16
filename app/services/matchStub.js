@@ -109,11 +109,24 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 
 // 机器人添加进准备列表
 pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
-	let robotArr = this.robotList[gameType][stage]
-	if (!this._isInArray(usrInfo.id, robotArr)) {
+	let robotArr = this.robotList[gameType][stage];
+	if (!this._updateUsrInfo(usrInfo, robotArr)) {
 		robotArr.push(usrInfo);
 		logger.info('添加机器人进列表:', usrInfo);
 	}
+};
+
+// 更新玩家属性
+pro._updateUsrInfo = function (usr, array) {
+	for (let i = 0; i < array.length; i++) {
+		const _id = array[i].id;
+		if (_id == usr.id) {
+			array[i].coins = usr.coins;
+			array[i].gems = usr.gems;
+			return true;
+		}
+	}
+	return false;
 };
 
 // 从机器人列表移除一个机器人并将其返回
@@ -124,17 +137,6 @@ pro._spliceRobotToReadyList = function (gameType, stage) {
 		logger.info('自动分配机器人:', robot);
 	}
 	return robot[0];
-};
-
-// 是否在数组中
-pro._isInArray = function (id, array) {
-	for (let i = 0; i < array.length; i++) {
-		const _id = array[i].id;
-		if (_id == id) {
-			return true;
-		}
-	}
-	return false;
 };
 
 // 是否是机器人
