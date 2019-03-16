@@ -41,8 +41,9 @@ pro.enterGoldRoom = function (gameType, stage, next) {
 	}
 
 	// 阶梯金币上下限检测
+	let usrInfo = this.entity.clientLoginInfo();
 	let curCoins = this.entity.coins;
-	if (!this._checkStage(gameType, stage, curCoins)) {
+	if (!this._isRobot(usrInfo.openid) && !this._checkStage(gameType, stage, curCoins)) {
 		next(null, {
 			code: consts.MatchCode.STAGE_COINS_LOW,
 			canStage: this._getCanEnterStage(gameType, curCoins)
@@ -50,7 +51,6 @@ pro.enterGoldRoom = function (gameType, stage, next) {
 		return;
 	}
 
-	let usrInfo = this.entity.clientLoginInfo();
 	usrInfo.preSid = this.entity.serverId;
 	pomelo.app.rpc.matchGlobal.matchRemote.enterGoldRoom(null, gameType, stage, usrInfo, function (resp) {
 		next(null, resp);
@@ -97,4 +97,12 @@ pro._getCanEnterStage = function (gameType, curCoins) {
 		}
 	}
 	return canStage;
+};
+
+// 是否是机器人
+pro._isRobot = function (openid) {
+	if (openid.indexOf("robot_") != -1) {
+		return true;
+	}
+	return false;
 };
