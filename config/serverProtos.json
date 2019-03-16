@@ -61,7 +61,9 @@
 	},
 
 	"onSettlement": {
-		"required uInt32 winUser": 1
+		"required uInt32 winUser": 1,
+		"repeated sInt32 accountData": 2,
+		"repeated uInt32 handCardData": 3
 	},
 
 	"onAutoCard": {

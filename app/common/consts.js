@@ -69,6 +69,7 @@ module.exports = {
 	ReadyGameCode: {
 		OK: 0,
 		GAME_STARTED: 1,    //游戏已经开始  
+		COINS_LESS: 2,      //玩家金币不足
 	},
 
 	ReadyState: {

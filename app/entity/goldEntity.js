@@ -11,6 +11,7 @@ let messageService = _require('../services/messageService');
 let pdkHelper = _require('../helper/pdkHelper');
 let utils = _require('../util/utils');
 let pdkAIHelper = _require('../helper/pdkAIHelper');
+let stageCfg = _require('../common/stage');
 
 let offset = 1.5;   // 客户端每回合动作表现时间
 
@@ -125,7 +126,10 @@ pro.readyGame = function (uid, next) {
 	let roomState = this.roomInfo.status;
 	if (roomState == consts.TableStatus.START) {
 		utils.invokeCallback(next, null, {code: consts.ReadyGameCode.GAME_STARTED});
-	}else {
+	} else if (!this._checkCoins()) {
+		// 金币不足判断
+		utils.invokeCallback(next, null, {code: consts.ReadyGameCode.COINS_LESS});
+	} else {
 		utils.invokeCallback(next, null, {code: consts.ReadyGameCode.OK});
 		this.setPlayerReadyState(uid, consts.ReadyState.Ready_Yes);
 		let readyCount = this.getPlayerReadyCount();
@@ -139,6 +143,22 @@ pro.readyGame = function (uid, next) {
 			this._notifyMsgToOtherMem(null, route, msg);
 		}
 	}
+};
+
+pro._checkCoins = function (uid) {
+	let cfg = stageCfg[this.roomInfo.gameType][this.roomInfo.stage];
+	let wChairID = this._getChairIDByUid(uid);
+	let curCoins = this.roomInfo.players[wChairID].coins;
+	if (cfg.eArea < 0) {
+		if (curCoins >= cfg.bArea) {
+			return true;
+		}
+	} else {
+		if (curCoins >= cfg.bArea && curCoins <= cfg.eArea) {
+			return true;
+		}
+	}
+	return false;
 };
 
 // uid 为空设置所有玩家
@@ -350,8 +370,17 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		// 结算消息
 		this.logger.info('赢家: [%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 		this._broadcastSettlementMsg(wChairID);
+
 		// 重置房间数据
 		this._resetRoomData();
+
+		// 修改数据库金币数
+		for (let i = 0; i < this.roomInfo.players.length; i++) {
+			const user = this.roomInfo.players[i];
+			let preServerID = user.preSid;
+			pomelo.app.rpc.connector.entryRemote.onUpdateUsrCoins.toServer(preServerID, user.id, user.coins, null);
+		}
+
 	} else {
 		this.logger.info('当前:[%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 		// 要不起自动下一手
@@ -372,6 +401,25 @@ pro._resetRoomData = function () {
 	this.setPlayerReadyState(null, consts.ReadyState.Ready_No);
 	this._setAutoState(null, consts.AutoState.AutoNo);
 	this._clearAutoSchedul();
+};
+
+// 结算金币
+pro._getSettlementCoins = function (winUser) {
+	let accounts = [];
+	let handCard = this.roomInfo.cardInfo.handCardData;
+	let underScore = stageCfg[this.roomInfo.gameType][this.roomInfo.stage].underScore;
+	let winCoins = 0;
+	for (let i = 0; i < handCard.length; i++) {
+		let data = handCard[i] || [];
+		let lessCoins = data.length * underScore;  // 扣币 = 牌张数 * 底分
+		let curCoins = this.roomInfo.players[i].coins;
+		lessCoins = ((lessCoins > curCoins) ? curCoins : lessCoins);
+		this.roomInfo.players[i].coins = this.roomInfo.players[i].coins - lessCoins;
+		winCoins = winCoins + lessCoins;
+		accounts.push(-lessCoins);
+	}
+	accounts[winUser] = winCoins;
+	return accounts;
 };
 
 // 要不起自动下手
@@ -438,9 +486,12 @@ pro._broadcastOutCardMsg = function (wChairID, bCardData, bCardCount, currentUse
 
 // 推送结算消息
 pro._broadcastSettlementMsg = function (wChairID) {
+	let accountData = this._getSettlementCoins(wChairID);
 	let route = 'onSettlement'
 	let msg = {
 		winUser: wChairID,
+		accountData: accountData,
+		handCardData: this.roomInfo.cardInfo.handCardData,
 	}
 	this._notifyMsgToOtherMem(null, route, msg);
 };

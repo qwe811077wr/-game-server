@@ -66,3 +66,10 @@ pro.onGoldDissolveGame = function (avtID, cb) {
 	}
     cb();
 };
+
+// 结算更新玩家金币
+pro.onUpdateUsrCoins = function (avtID, coins, cb) {
+	var avatar = entityManager.getEntity(avtID);
+    avatar.updataUserCoins(coins);
+    cb();
+};

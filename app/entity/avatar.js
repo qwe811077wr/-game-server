@@ -61,6 +61,10 @@ pro.updateUserGoldRoomid = function (goldRoomId) {
     this.goldRoomId = goldRoomId;
 };
 
+pro.updataUserCoins = function (coins) {
+	this.coins = coins;
+};
+
 // 离线所得金币
 pro._getCoinsByOffline = function () {
 	if (this.lastOfflineTime === 0) {

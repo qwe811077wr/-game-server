@@ -114,6 +114,9 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 
 // 机器人添加进准备列表
 pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
+	// 重置机器人金币数量  todo:::cxx
+	usrInfo.coins = 10000000;
+
 	let robotArr = this.robotList[gameType][stage];
 	if (!this._updateUsrInfo(usrInfo, robotArr)) {
 		robotArr.push(usrInfo);
