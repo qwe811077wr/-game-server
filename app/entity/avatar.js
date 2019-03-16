@@ -189,7 +189,8 @@ pro.disconnect = function () {
     this.logoutTimer = setTimeout(function () {
         this.destroy();
     }.bind(this), 1000 * 60 * 5);  // 离线缓冲
-    this.emit("EventDisconnect", this);
+	this.emit("EventDisconnect", this);
+	this.lastOfflineTime = Math.ceil(Date.now()/1000);
 };
 
 // 重新连接
@@ -202,7 +203,8 @@ pro.reconnect = function () {
     else {
         // 给客户端提示顶号
         // this.sendMessage('onBeRelay', {}, true);
-    }
+	}
+	this.offlineCoins = this._getCoinsByOffline();
 };
 
 // 踢下线
@@ -211,13 +213,12 @@ pro.kickOffline = function (reason, rightNow) {
     sessionService.kick(this.id, reason, function () {
         if (rightNow)
             this.destroy();
-    })
+	})
+	this.lastOfflineTime = Math.ceil(Date.now()/1000);
 };
 
 // 销毁
 pro.destroy = function (cb) {
-    this.lastOfflineTime = Math.ceil(Date.now()/1000);
-
     // todo: 先放这里，后续可能会有其他登出流程
     this.emit("EventLogout", this);
     var self = this;

@@ -5,8 +5,9 @@
  */
 let pomelo = require('pomelo');
 let util = require('util');
-let Component = _require('../component');
+let Component = require('../component');
 let consts = require('../../common/consts');
+let stageCfg = _require('../../common/stage');
 
 let LobbyComponent = function (entity) {
     Component.call(this, entity);
@@ -39,6 +40,16 @@ pro.enterGoldRoom = function (gameType, stage, next) {
 		return;
 	}
 
+	// 阶梯金币上下限检测
+	let curCoins = this.entity.coins;
+	if (!this._checkStage(gameType, stage, curCoins)) {
+		next(null, {
+			code: consts.MatchCode.STAGE_COINS_LOW,
+			canStage: this._getCanEnterStage(gameType, curCoins)
+		});
+		return;
+	}
+
 	let usrInfo = this.entity.clientLoginInfo();
 	usrInfo.preSid = this.entity.serverId;
 	pomelo.app.rpc.matchGlobal.matchRemote.enterGoldRoom(null, gameType, stage, usrInfo, function (resp) {
@@ -53,4 +64,37 @@ pro._checkValid = function (gameType, stage) {
 		return true;
 	}
 	return false;
+};
+
+pro._checkStage = function (gameType, stage, curCoins) {
+	let cfg = stageCfg[gameType][stage];
+	if (cfg.eArea < 0) {
+		if (curCoins >= cfg.bArea) {
+			return true;
+		}
+	} else {
+		if (curCoins >= cfg.bArea && curCoins <= cfg.eArea) {
+			return true;
+		}
+	}
+	return false;
+};
+
+pro._getCanEnterStage = function (gameType, curCoins) {
+	let cfg = stageCfg[gameType];
+	let canStage = [];
+	for (const i in cfg) {
+		let began = cfg[i].bArea;
+		let end = cfg[i].eArea;
+		if (end < 0) {
+			if (curCoins >= began) {
+				canStage.push(parseInt(i));
+			}
+		} else {
+			if (curCoins >= began && curCoins <= end) {
+				canStage.push(parseInt(i));
+			}
+		}
+	}
+	return canStage;
 };

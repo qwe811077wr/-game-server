@@ -109,6 +109,7 @@ module.exports = {
 		OK: 0,
 		GAEM_TYPE_INVALID: 1,  // 游戏类型不存在
 		EXIST_IN_GAME: 2, 	//已经在游戏中了
+		STAGE_COINS_LOW: 3, //阶梯金币数量不满足
 	},
 
 	// 游戏类型

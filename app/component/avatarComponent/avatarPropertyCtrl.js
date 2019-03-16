@@ -4,7 +4,7 @@
  * Description:
  */
 let util = require('util');
-let Component = _require('../component');
+let Component = require('../component');
 let avatarProperty = _require('./avatarProperty');
 let consts = require('../../common/consts');
 

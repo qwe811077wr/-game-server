@@ -5,7 +5,7 @@
  */
 var util = require('util');
 var logger = require('pomelo-logger').getLogger('game');
-var Component = _require('../component');
+var Component = require('../component');
 
 var LoggerComponent = function (entity) {
     Component.call(this, entity);

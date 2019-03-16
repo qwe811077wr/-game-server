@@ -5,7 +5,7 @@
  */
 let pomelo = require('pomelo');
 let util = require('util');
-let Component = _require('../component');
+let Component = require('../component');
 let consts = require('../../common/consts');
 let messageService = _require('../../services/messageService');
 var dispatcher = _require('../../util/dispatcher');

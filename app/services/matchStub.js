@@ -9,6 +9,7 @@ var logger = require('pomelo-logger').getLogger('game', 'matchStub');
 var consts = require('../common/consts');
 var dispatcher = _require('../util/dispatcher');
 let messageService = _require('../services/messageService');
+let stageCfg = _require('../common/stage');
 
 var instance = null;
 
@@ -58,14 +59,18 @@ pro._init = function () {
 
 // 获取金币场大厅信息
 pro.getMatchInfo = function (gameType, cb) {
+	let robotList = this.robotList[gameType];
+	if (!robotList) {
+		cb({code: consts.MatchCode.GAEM_TYPE_INVALID});
+		return;
+	}
+
 	let gameInfo = [];
-	let robotStages = this.robotList[gameType];
-	let i = 0;
-	do {
-		const robots = robotStages[i];
-		gameInfo.push(robots.length);
-		i++;
-	} while (i < robotStages.length);
+	for (const i in robotList) {
+		let info = stageCfg[gameType][i];
+		info.peopleNum = info.peopleNum + robotList[i].length;
+		gameInfo.push(info);
+	}
 
 	let resp = {
 		code: consts.MatchCode.OK,
