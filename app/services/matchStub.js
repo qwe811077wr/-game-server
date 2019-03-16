@@ -114,14 +114,21 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 
 // 机器人添加进准备列表
 pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
-	// 重置机器人金币数量  todo:::cxx
-	usrInfo.coins = 10000000;
-
+	// 重置机器人金币数量
+	usrInfo.coins = this._getRobotRandCoins(gameType, stage);
 	let robotArr = this.robotList[gameType][stage];
 	if (!this._updateUsrInfo(usrInfo, robotArr)) {
 		robotArr.push(usrInfo);
 		logger.info('添加机器人进列表:', usrInfo);
 	}
+};
+
+// 获取机器人随机金币数
+pro._getRobotRandCoins = function (gameType, stage) {
+	let info = stageCfg[gameType][stage];
+	let bArea = info.bArea;
+	let eArea = (info.eArea < 0) ? bArea*100 : eArea;
+	return parseInt(Math.random()*(eArea-bArea+1)+bArea,10);
 };
 
 // 更新玩家属性
