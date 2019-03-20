@@ -61,9 +61,12 @@
 	},
 
 	"onSettlement": {
+		"message Data": {
+			"repeated uInt32 handData": 1
+		},
 		"required uInt32 winUser": 1,
 		"repeated sInt32 accountData": 2,
-		"repeated uInt32 handCardData": 3
+		"repeated Data handCardData": 3
 	},
 
 	"onAutoCard": {
