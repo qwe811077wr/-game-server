@@ -126,7 +126,7 @@ pro.readyGame = function (uid, next) {
 	let roomState = this.roomInfo.status;
 	if (roomState == consts.TableStatus.START) {
 		utils.invokeCallback(next, null, {code: consts.ReadyGameCode.GAME_STARTED});
-	} else if (!this._checkCoins()) {
+	} else if (!this._checkCoins(uid)) {
 		// 金币不足判断
 		utils.invokeCallback(next, null, {code: consts.ReadyGameCode.COINS_LESS});
 	} else {
