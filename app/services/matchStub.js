@@ -33,16 +33,16 @@ var pro  = MatchStub.prototype;
 pro._init = function () {
 	let self = this;
 	// pdk15 init
-	// this.matchInfo[consts.GameType.PDK_15] = [];
-	// this.robotList[consts.GameType.PDK_15] = [];
-	// this.schedulList[consts.GameType.PDK_15] = [];
-	// for (let i = 0; i < consts.Pdk15StageCount; i++) {
-	// 	this.matchInfo[consts.GameType.PDK_15][i] = {};
-	// 	this.robotList[consts.GameType.PDK_15][i] = [];
-	// 	this.schedulList[consts.GameType.PDK_15][i] = setInterval(function () {
-	// 		self._startMatchRobot(consts.GameType.PDK_15, i);
-	// 	}, 3000 + i * 3000);
-	// }
+	this.matchInfo[consts.GameType.PDK_15] = [];
+	this.robotList[consts.GameType.PDK_15] = [];
+	this.schedulList[consts.GameType.PDK_15] = [];
+	for (let i = 0; i < consts.Pdk15StageCount; i++) {
+		this.matchInfo[consts.GameType.PDK_15][i] = {};
+		this.robotList[consts.GameType.PDK_15][i] = [];
+		this.schedulList[consts.GameType.PDK_15][i] = setInterval(function () {
+			self._startMatchRobot(consts.GameType.PDK_15, i);
+		}, 3000 + i * 3000);
+	}
 
 	// pdk16 init
 	this.matchInfo[consts.GameType.PDK_16] = [];
