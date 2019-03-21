@@ -9,8 +9,8 @@
             "type": "node",
             "request": "attach",
             "name": "Remote",
-            "address": "127.0.0.1",
-			"port": 10006,
+            "address": "47.99.50.101",
+			"port": 10001,
             "localRoot": "",
         },
         {
