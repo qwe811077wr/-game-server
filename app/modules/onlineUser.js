@@ -1,5 +1,6 @@
 
 var async = require('async');
+var entityManager = require('../services/entityManager');
 
 module.exports = function (opts) {
     return new Module(opts);
@@ -29,7 +30,15 @@ Module.prototype.monitorHandler = function (agent, msg, cb) {
 		// logger.error('not support connection: %j', agent.id);
 		return;
 	}
-    var info = connectionService.getStatisticsInfo();
+	var info = connectionService.getStatisticsInfo();
+	// 插入用户名字
+	var loginedList = info.loginedList
+	for (const key in loginedList) {
+		let user = loginedList[key];
+		let avatar = entityManager.getEntity(user.uid);
+		loginedList[key].username = avatar.name;
+	}
+
     console.log('serverId: ' ,agent.id, ' info: ', info);
     cb(null, {
         serverId: agent.id,
