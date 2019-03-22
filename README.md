@@ -3,9 +3,9 @@
 python -m SimpleHTTPServer 9999
 
 #【调试】
-1.servers.json添加对应要调试的服务配置("args": " --inspect=5858",每个服务对应一个端口)
+1.servers.json添加对应要调试的服务配置("args": " --inspect=5858",默认调试监听端口是本地,对外开放:"--inspect=0.0.0.0:5858",注意正式环境不要对外开放)
 2.命令行后台启动服务器(cd根目录，执行pomelo start)
-3.选择要调试的服务端口(launch.json),启动vscode远程调试
+3.选择要调试的服务端口(launch.json),启动vscode远程调试(由于是多进程,每次只能调试一个进程)
 
 #【环境】
 一：安装nodejs(-v 8.11.x)
