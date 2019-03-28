@@ -9,7 +9,7 @@ let persistProperties = {
     name: "unknow",  // 名字
     gender: 0,  // 性别：0：未知 1：男性 2：女性
     avatarUrl: "",  // 用户头像图片的 URL
-    coins: 0,  // 金币
+    coins: 5000,  // 金币
 	gems: 0,  // 元宝
 	roomid: 0, //房间ID
     goldRoomId: "0", // 金币场房间ID
