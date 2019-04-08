@@ -276,6 +276,10 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		bCardData = outCard.bCardData;
 		bCardCount = outCard.bCardCount;
 	}
+	this.logger.info(bCardData, bCardCount);
+	if (!bCardData) {
+		return;
+	}
 	bCardData = bCardData.slice(0, bCardCount);
 
 	// 是否轮到出牌
