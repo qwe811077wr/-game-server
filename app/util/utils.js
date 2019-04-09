@@ -154,3 +154,18 @@ utils.isEmptyObject = function (obj){
     }
     return true;
 };
+
+// 生成n位长度的数字id
+utils.generateRandom = function(n) { 
+	n = n || 8;
+    var str = "0123456789";
+    var result = "";
+    for(var i = 0; i < n; i++) {
+		result += str[parseInt(Math.random() * str.length)];
+		if (i == 0 && result == '0') {
+			let tmp = '123456789'
+			result = tmp[parseInt(Math.random() * tmp.length)]
+		}
+    }
+    return Number(result);
+}
