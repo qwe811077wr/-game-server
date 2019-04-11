@@ -21,11 +21,3 @@ handler.createRoom = function (msg, session, next) {
 handler.joinRoom = function (msg, session, next) {
 	session.avatar.lobby.joinRoom(msg.roomid, next);
 };
-
-handler.getMatchInfo = function (msg, session, next) {
-    session.avatar.lobby.getMatchInfo(msg.gameType, next);
-};
-
-handler.startMatch = function (msg, session, next) {
-    session.avatar.lobby.startMatch(msg.gameType, msg.stage, next);
-};
