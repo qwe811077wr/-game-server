@@ -12,6 +12,7 @@ let pdkHelper = _require('../helper/pdkHelper');
 let utils = _require('../util/utils');
 let pdkAIHelper = _require('../helper/pdkAIHelper');
 let stageCfg = _require('../common/stage');
+let common = require('../common/common');
 
 let GoldEntity = function (opts) {
     opts = opts || {};
@@ -107,6 +108,17 @@ pro.addUserToPlayers = function (usrInfo, chairID) {
 		openid: usrInfo.openid
 	};
 	this.roomInfo.players.push(playerInfo);
+};
+
+pro.removeUserInPlayers = function (uid) {
+	let userInfo = this.roomInfo.players;
+	for (let i = 0; i < userInfo.length; i++) {
+		const user = userInfo[i];
+		if (uid == user.id) {
+			this.roomInfo.players.splice(i, 1);
+			break;
+		}
+	}
 };
 
 pro.updateUserToPlayers = function (usrInfo) {
@@ -423,7 +435,10 @@ pro._getSettlementCoins = function (winUser) {
 // 要不起自动下手
 pro._checkNextOutCard = function (wChairID, nextChariID) {
 	if (wChairID == nextChariID) {
-		return false;
+		// 闹钟提示
+		this._broadcastOutCardNotify(this.roomInfo.cardInfo.currentUser);
+		this._startAutoSchedule();
+		return;
 	}
 
 	let cardInfo = this.roomInfo.cardInfo;
@@ -630,9 +645,29 @@ pro.leaveRoom = function (uid, next) {
 		return;
 	}
 
-	// 解散房间
-	next(null, {code: consts.LeaveRoomCode.LEAVE_ROOM_DISSOLVE});
-	this.destroy();
+	// 玩家退出直接解散房间、机器人退出就退出自己
+	let wChairID = this._getChairIDByUid(uid);
+	let userInfo = this.roomInfo.players[wChairID];
+	if (common.isRobot(userInfo.openid)) {
+		// 离开房间
+		this.removeUserInPlayers(uid);
+		next(null, {code: consts.LeaveRoomCode.OK});
+
+		// 向其它人广播离开消息
+		let route = 'onLeaveRoom';
+		let msg = {uid: uid};
+		this._notifyMsgToOtherMem(null, route, msg);
+
+		let gameType = this.roomInfo.gameType;
+		let stage = this.roomInfo.stage;
+		let goldRoomId = this.roomInfo.roomid;
+		pomelo.app.rpc.matchGlobal.matchRemote.leaveGoldRoom(null, gameType, stage, goldRoomId, uid, null);
+
+	} else {
+		// 解散房间
+		next(null, {code: consts.LeaveRoomCode.LEAVE_ROOM_DISSOLVE});
+		this.destroy();
+	}
 };
 
 // 销毁

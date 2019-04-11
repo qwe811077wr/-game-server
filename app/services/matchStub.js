@@ -10,6 +10,7 @@ var consts = require('../common/consts');
 var dispatcher = _require('../util/dispatcher');
 let messageService = _require('../services/messageService');
 let stageCfg = _require('../common/stage');
+let common = require('../common/common');
 
 var instance = null;
 
@@ -90,7 +91,7 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 	let toServerId = roomInfo.toServerId;
 	if (!toServerId) {
 		// 如果是机器人
-		if (this._isRobot(usrInfo.openid)) {
+		if (common.isRobot(usrInfo.openid)) {
 			this._addRobotToReadyList(gameType, stage, usrInfo);
 			cb({code: consts.MatchCode.OK});
 			return;
@@ -155,18 +156,24 @@ pro._spliceRobotToReadyList = function (gameType, stage) {
 	return robot[0];
 };
 
-// 是否是机器人
-pro._isRobot = function (openid) {
-	if (openid.indexOf("robot_") != -1) {
-		return true;
-	}
-	return false;
-};
-
 // 更新房间信息
 pro._updateRoomInfo = function (gameType, stage, roomInfo) {
 	let list = this.matchInfo[gameType][stage];
 	list[roomInfo.roomid] = roomInfo;
+};
+
+// 房间有人退出
+pro._removeUserRoomInfo = function (gameType, stage, roomid, uid) {
+	let roomInfo = this.matchInfo[gameType][stage][roomid];
+	let userInfo = roomInfo.players;
+	for (let i = 0; i < userInfo.length; i++) {
+		const user = userInfo[i];
+		if (uid == user.id) {
+			roomInfo.players.splice(i, 1);
+			break;
+		}
+	}
+	logger.info('离开玩家与剩余玩家:',uid, this.matchInfo[gameType][stage][roomid].players);
 };
 
 // 移除房间信息
@@ -266,11 +273,26 @@ pro.dissolveGoldRoom = function (gameType, stage, goldRoomId, cb) {
 	let players = roomInfo.players;
 	for (let i = 0; i < players.length; i++) {
 		const user = players[i];
-		if (this._isRobot(user.openid)) {
+		if (common.isRobot(user.openid)) {
 			// 机器人自动加入准备列表
 			this._addRobotToReadyList(gameType, stage, user);
 		}
 	}
 	this._removeRoomInfo(gameType, stage, goldRoomId);
+	cb();
+};
+
+pro.leaveGoldRoom = function (gameType, stage, goldRoomId, uid, cb) {
+	let roomInfo = this._findRoomInfo(gameType, stage, goldRoomId);
+	let players = roomInfo.players;
+	for (let i = 0; i < players.length; i++) {
+		const user = players[i];
+		if (uid == user.id && common.isRobot(user.openid)) {
+			// 机器人自动加入准备列表
+			this._addRobotToReadyList(gameType, stage, user);
+			break;
+		}
+	}
+	this._removeUserRoomInfo(gameType, stage, goldRoomId, uid);
 	cb();
 };

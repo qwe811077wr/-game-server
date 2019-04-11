@@ -62,7 +62,7 @@ module.exports = {
 		OK: 0,
 		NO_EXIST_ROOM: 1,   //房间不存在
 		START_GAME_NO_LEAVE: 2, //游戏已经开始不能离开牌桌
-		LEAVE_ROOM_DISSOLVE: 3, //房间只有一个人离开,房间解散
+		LEAVE_ROOM_DISSOLVE: 3, //房间解散
 	},
 
 	// 准备

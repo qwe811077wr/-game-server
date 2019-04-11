@@ -8,6 +8,7 @@ let util = require('util');
 let Component = require('../component');
 let consts = require('../../common/consts');
 let stageCfg = _require('../../common/stage');
+let common = require('../../common/common');
 
 let LobbyComponent = function (entity) {
     Component.call(this, entity);
@@ -43,7 +44,7 @@ pro.enterGoldRoom = function (gameType, stage, next) {
 	// 阶梯金币上下限检测
 	let usrInfo = this.entity.clientLoginInfo();
 	let curCoins = this.entity.coins;
-	if (!this._isRobot(usrInfo.openid) && !this._checkStage(gameType, stage, curCoins)) {
+	if (!common.isRobot(usrInfo.openid) && !this._checkStage(gameType, stage, curCoins)) {
 		next(null, {
 			code: consts.MatchCode.STAGE_COINS_LOW,
 			canStage: this._getCanEnterStage(gameType, curCoins)
@@ -97,12 +98,4 @@ pro._getCanEnterStage = function (gameType, curCoins) {
 		}
 	}
 	return canStage;
-};
-
-// 是否是机器人
-pro._isRobot = function (openid) {
-	if (openid.indexOf("robot_") != -1) {
-		return true;
-	}
-	return false;
 };
