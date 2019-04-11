@@ -433,7 +433,7 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 	let turnCardData = cardInfo.turnCardData;
 	let turnCardCount = cardInfo.turnCardCount;
 	this._stopAutoSchedul();
-	
+
 	if (pdkHelper.SearchOutCard(handCardData, cardCount, turnCardData, turnCardCount)==false)
 	{
 		// 要不起
@@ -448,7 +448,7 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 
 			// 递归
 			this._checkNextOutCard(wChairID, currentUser);
-		}, 1.5 * 1000);
+		}.bind(this), 1.5 * 1000);
 
 	} else {
 		// 闹钟提示
