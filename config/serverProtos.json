@@ -60,12 +60,6 @@
 		"required uInt32 wCurrentUser": 2
 	},
 
-	"onSettlement": {
-		"required uInt32 winUser": 1,
-		"repeated sInt32 accountData": 2,
-		"repeated uInt32 handCardData": 3
-	},
-
 	"onAutoCard": {
 		"required uInt32 wAutoUser": 1,
 		"required uInt32 bAuto": 2

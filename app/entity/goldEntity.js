@@ -520,7 +520,6 @@ pro._broadcastSettlementMsg = function (wChairID) {
 		handCardData: this.roomInfo.cardInfo.handCardData,
 	}
 	this._notifyMsgToOtherMem(null, route, msg);
-	this.logger.info('结算手牌数据:', this.roomInfo.cardInfo.handCardData);
 };
 
 // 推送要不起消息
