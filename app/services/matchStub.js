@@ -116,6 +116,7 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 	// 重置机器人金币数量
 	usrInfo.coins = this._getRobotRandCoins(gameType, stage);
+	logger.info('机器人随机金币数:', gameType, stage, usrInfo.coins);
 	let robotArr = this.robotList[gameType][stage];
 	if (!this._updateUsrInfo(usrInfo, robotArr)) {
 		robotArr.push(usrInfo);
@@ -126,9 +127,9 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 // 获取机器人随机金币数
 pro._getRobotRandCoins = function (gameType, stage) {
 	let info = stageCfg[gameType][stage];
-	let bArea = info.bArea;
-	let eArea = (info.eArea < 0) ? bArea*100 : info.eArea;
-	return parseInt(Math.random()*(eArea-bArea+1)+bArea,10);
+	let lower = info.bArea;
+	let upper = (info.eArea < 0) ? lower*5 : info.eArea;
+	return Math.floor(Math.random() * (upper - lower)) + lower;
 };
 
 // 更新玩家属性
