@@ -435,9 +435,11 @@ pro._getSettlementCoins = function (winUser) {
 // 要不起自动下手
 pro._checkNextOutCard = function (wChairID, nextChariID) {
 	if (wChairID == nextChariID) {
-		// 闹钟提示
-		this._broadcastOutCardNotify(this.roomInfo.cardInfo.currentUser);
-		this._startAutoSchedule();
+		setTimeout(function () {
+			// 闹钟提示
+			this._broadcastOutCardNotify(this.roomInfo.cardInfo.currentUser);
+			this._startAutoSchedule();
+		}.bind(this), 1.5 * 1000);
 		return;
 	}
 
@@ -627,6 +629,11 @@ pro._stopAutoSchedul = function () {
 
 // 托管请求
 pro.autoCard = function (uid, bAuto, next) {
+	if (this.roomInfo.status !== consts.TableStatus.START) {
+		next(null, {code: consts.FAIL});
+		return;
+	}
+
 	let wChairID = this._getChairIDByUid(uid);
 	this._broadcastAutoCardMsg(wChairID, bAuto);
 	next(null, consts.OK);
