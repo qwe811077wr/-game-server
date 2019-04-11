@@ -470,8 +470,11 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 
 	} else {
 		// 闹钟提示
-		this._broadcastOutCardNotify(this.roomInfo.cardInfo.currentUser);
-		this._startAutoSchedule();
+		setTimeout(function () {
+			// 闹钟提示
+			this._broadcastOutCardNotify(this.roomInfo.cardInfo.currentUser);
+			this._startAutoSchedule();
+		}.bind(this), 1.5 * 1000);
 	}
 };
 
