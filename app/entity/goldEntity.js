@@ -411,6 +411,7 @@ pro._resetRoomData = function () {
 	this.roomInfo.cardInfo.bUserWarn = [false, false, false];
 	this.setPlayerReadyState(null, consts.ReadyState.Ready_No);
 	this._setAutoState(null, consts.AutoState.AutoNo);
+	this._stopAutoSchedul();
 };
 
 // 结算金币
@@ -608,6 +609,7 @@ pro._startAutoSchedule = function (dt, offset) {
 		dt = offset;
 	}
 
+	this._stopAutoSchedul();
 	self.autoSchedule = setTimeout(function () {
 		if (autoStatus == consts.AutoState.AutoYes) {
 			// 自动打牌
