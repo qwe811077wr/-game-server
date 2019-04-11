@@ -13,13 +13,11 @@ let utils = _require('../util/utils');
 let pdkAIHelper = _require('../helper/pdkAIHelper');
 let stageCfg = _require('../common/stage');
 
-let offset = 1.5;   // 客户端每回合动作表现时间
-
 let GoldEntity = function (opts) {
     opts = opts || {};
 	Entity.call(this, opts);
-	this.autoSchedule = null; // 托管定时器
 	this.roomInfo = {};  // 房间信息
+	this.autoSchedule = null; 
 	this.initGoldRoom(opts.usrInfo, opts.gameType, opts.stage);
 };
 
@@ -233,7 +231,7 @@ pro._startGame = function () {
 		messageService.pushMessageByUids(uids, route, msg);
 		this.logger.info("name[%s] sid[%s] msg[%s]", user.name, sid, route);
 	}
-	this._resetAutoSchedule(20);
+	this._startAutoSchedule(20, 0.5);
 };
 
 // 获取庄家[cbCard:这个牌先出]
@@ -369,6 +367,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 
 	// 出牌消息
 	this._broadcastOutCardMsg(wChairID, bCardData, bCardCount, cardInfo.currentUser);
+	this.logger.info('当前:[%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 
 	if (cardInfo.currentUser == consts.InvalUser) {
 		// 结算消息
@@ -386,13 +385,9 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		}
 
 	} else {
-		this.logger.info('当前:[%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 		// 要不起自动下一手
 		this._checkNextOutCard(wChairID, cardInfo.currentUser);
 	}
-
-	// 刷新闹钟提示
-	this._broadcastOutCardNotify(cardInfo.currentUser);
 };
 
 // 重置房间数据
@@ -404,7 +399,6 @@ pro._resetRoomData = function () {
 	this.roomInfo.cardInfo.bUserWarn = [false, false, false];
 	this.setPlayerReadyState(null, consts.ReadyState.Ready_No);
 	this._setAutoState(null, consts.AutoState.AutoNo);
-	this._clearAutoSchedul();
 };
 
 // 结算金币
@@ -438,20 +432,28 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 	let cardCount = cardInfo.cardCount[nextChariID];
 	let turnCardData = cardInfo.turnCardData;
 	let turnCardCount = cardInfo.turnCardCount;
-
+	this._stopAutoSchedul();
+	
 	if (pdkHelper.SearchOutCard(handCardData, cardCount, turnCardData, turnCardCount)==false)
 	{
 		// 要不起
-		let wPassUser = nextChariID;
-		let currentUser=(wPassUser+1) % playerCount;
-		this.roomInfo.cardInfo.currentUser = currentUser;
-		this.logger.info('要不起:[%d](%s)',wPassUser, this.roomInfo.players[wPassUser].name);
+		setTimeout(function () {
+			let wPassUser = nextChariID;
+			let currentUser=(wPassUser+1) % playerCount;
+			this.roomInfo.cardInfo.currentUser = currentUser;
+			this.logger.info('要不起:[%d](%s)',wPassUser, this.roomInfo.players[wPassUser].name);
 
-		// 推送要不起消息
-		this._broadcastPassCardMsg(wPassUser, currentUser);
+			// 推送要不起消息
+			this._broadcastPassCardMsg(wPassUser, currentUser);
 
-		// 递归
-		this._checkNextOutCard(wChairID, currentUser);
+			// 递归
+			this._checkNextOutCard(wChairID, currentUser);
+		}, 1.5 * 1000);
+
+	} else {
+		// 闹钟提示
+		this._broadcastOutCardNotify(this.roomInfo.cardInfo.currentUser);
+		this._startAutoSchedule();
 	}
 };
 
@@ -485,7 +487,6 @@ pro._broadcastOutCardMsg = function (wChairID, bCardData, bCardCount, currentUse
 		currentUser: currentUser
 	}
 	this._notifyMsgToOtherMem(null, route, msg);
-	this._resetAutoSchedule();
 };
 
 // 推送结算消息
@@ -508,7 +509,6 @@ pro._broadcastPassCardMsg = function (wPassUser, currentUser) {
 		wCurrentUser: currentUser,
 	}
 	this._notifyMsgToOtherMem(null, route, msg);
-	this._resetAutoSchedule();
 };
 
 // 推送托管消息
@@ -526,7 +526,7 @@ pro._broadcastAutoCardMsg = function (wAutoUser, bAuto) {
 	}
 };
 
-// 当前出牌提示
+// 当前出牌闹钟提示
 pro._broadcastOutCardNotify = function (currentUser) {
 	let route = 'onOutCardNotify'
 	let msg = {
@@ -573,26 +573,27 @@ pro._getAutoState = function (wChairID) {
 	return this.roomInfo.players[wChairID].autoState;
 }
 
-// 托管定时器重置
-pro._resetAutoSchedule = function (dt) {
-	let self = this;
-	dt = dt || 15;  // 默认15s自动托管
-	dt = dt + offset;
-	self._clearAutoSchedul();
-	
+// 托管定时器
+pro._startAutoSchedule = function (dt, offset) {
 	let wChairID = this.roomInfo.cardInfo.currentUser;
 	if (wChairID == consts.InvalUser) {
 		return;
 	}
 
-	// 已经托管不能直接调用playCard，要有延时(TODO:原因以后研究...)
-	if (self._getAutoState(wChairID) == consts.AutoState.AutoYes) {
-		dt = 1;
+	let self = this;
+	dt = dt || 15;  // 默认15s自动托管
+	offset = offset || 1.5; // 默认前端表现延时
+	dt = dt + offset;
+	
+	// 已经托管
+	let autoStatus = self._getAutoState(wChairID);
+	if (autoStatus == consts.AutoState.AutoYes) {
+		dt = offset;
 	}
 
-	self.autoSchedule = setInterval(function () {
-		if (self._getAutoState(wChairID) == consts.AutoState.AutoYes) {
-			// 已经托管
+	self.autoSchedule = setTimeout(function () {
+		if (autoStatus == consts.AutoState.AutoYes) {
+			// 自动打牌
 			self.playCard();
 		} else {
 			// 进入托管
@@ -601,8 +602,8 @@ pro._resetAutoSchedule = function (dt) {
 	}, dt * 1000);
 };
 
-// 托管定时器清除
-pro._clearAutoSchedul = function () {
+// 定时器停止
+pro._stopAutoSchedul = function () {
 	if (this.autoSchedule) {
 		clearTimeout(this.autoSchedule);
 		this.autoSchedule = null;
@@ -636,8 +637,6 @@ pro.leaveRoom = function (uid, next) {
 
 // 销毁
 pro.destroy = function () {
-	this._clearAutoSchedul();
-
 	let gameType = this.roomInfo.gameType;
 	let stage = this.roomInfo.stage;
 	let goldRoomId = this.roomInfo.roomid;
