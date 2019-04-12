@@ -94,6 +94,11 @@ pro.checkFullMember = function () {
 };
 
 pro.addUserToPlayers = function (usrInfo, chairID) {
+	if (chairID != this.roomInfo.players.length) {
+		this.logger.error('add user error', chairID, usrInfo, this.roomInfo.players);
+		return;
+	}
+
 	let playerInfo = {
 		id: usrInfo.id,
 		name: usrInfo.name,
