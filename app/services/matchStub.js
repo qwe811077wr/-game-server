@@ -129,7 +129,7 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 pro._getRobotRandCoins = function (gameType, stage) {
 	let info = stageCfg[gameType][stage];
 	let lower = info.bArea;
-	let upper = (info.eArea < 0) ? lower*5 : info.eArea;
+	let upper = (info.eArea < 0) ? lower*2 : info.eArea;
 	return Math.floor(Math.random() * (upper - lower)) + lower;
 };
 
@@ -160,29 +160,6 @@ pro._spliceRobotToReadyList = function (gameType, stage) {
 pro._updateRoomInfo = function (gameType, stage, roomInfo) {
 	let list = this.matchInfo[gameType][stage];
 	list[roomInfo.roomid] = roomInfo;
-};
-
-// 房间有人退出
-pro._removeUserRoomInfo = function (gameType, stage, roomid, uid) {
-	let roomInfo = this.matchInfo[gameType][stage][roomid];
-	let players = roomInfo.players;
-	for (const key in players) {
-		if (players.hasOwnProperty(key)) {
-			const user = players[key];
-			if (uid == user.id) {
-				delete players[key];
-				break;
-			}
-		}
-	}
-	logger.info('离开玩家与剩余玩家:',uid, this.matchInfo[gameType][stage][roomid].players);
-};
-
-// 移除房间信息
-pro._removeRoomInfo = function (gameType, stage, roomid) {
-	let list = this.matchInfo[gameType][stage];
-	logger.info('房间移除:', roomid);
-	delete list[roomid];
 };
 
 // 查找房间信息
@@ -275,35 +252,24 @@ pro._getUserInfoByUid = function (uid, players) {
 };
 
 pro.dissolveGoldRoom = function (gameType, stage, goldRoomId, cb) {
-	let roomInfo = this._findRoomInfo(gameType, stage, goldRoomId);
-	let players = roomInfo.players;
-	for (const key in players) {
-		if (players.hasOwnProperty(key)) {
-			const user = players[key];
-			if (common.isRobot(user.openid)) {
-				// 机器人自动加入准备列表
-				this._addRobotToReadyList(gameType, stage, user);
-			}
-		}
-	}
-	this._removeRoomInfo(gameType, stage, goldRoomId);
+	let list = this.matchInfo[gameType][stage];
+	delete list[goldRoomId];
+	logger.info('移除房间:', gameType, stage, goldRoomId);
 	cb();
 };
 
 pro.leaveGoldRoom = function (gameType, stage, goldRoomId, uid, cb) {
-	let roomInfo = this._findRoomInfo(gameType, stage, goldRoomId);
+	let roomInfo = this.matchInfo[gameType][stage][goldRoomId];
 	let players = roomInfo.players;
 	for (const key in players) {
 		if (players.hasOwnProperty(key)) {
 			const user = players[key];
-			if (uid == user.id && common.isRobot(user.openid)) {
-				// 机器人自动加入准备列表
-				this._addRobotToReadyList(gameType, stage, user);
+			if (uid == user.id) {
+				delete players[key];
 				break;
 			}
 		}
 	}
-
-	this._removeUserRoomInfo(gameType, stage, goldRoomId, uid);
+	logger.info('离开玩家与剩余玩家:',uid, players);
 	cb();
 };

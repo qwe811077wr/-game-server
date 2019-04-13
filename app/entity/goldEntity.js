@@ -694,28 +694,27 @@ pro.leaveRoom = function (uid, next) {
 		next(null, {code: consts.LeaveRoomCode.START_GAME_NO_LEAVE});
 		return;
 	}
+	next(null, {code: consts.LeaveRoomCode.OK});
 
 	// 玩家退出直接解散房间、机器人退出就退出自己
 	let wChairID = this._getChairIDByUid(uid);
-	let userInfo = this.roomInfo.players[wChairID];
-	if (common.isRobot(userInfo.openid)) {
+	let user = this.roomInfo.players[wChairID];
+	let self = this;
+	if (common.isRobot(user.openid)) {
 		// 离开房间
 		this.removeUserInPlayers(uid);
-		next(null, {code: consts.LeaveRoomCode.OK});
-
-		// 向其它人广播离开消息
-		let route = 'onLeaveRoom';
-		let msg = {wChairID: wChairID};
-		this._notifyMsgToOtherMem(null, route, msg);
-
 		let gameType = this.roomInfo.gameType;
 		let stage = this.roomInfo.stage;
 		let goldRoomId = this.roomInfo.roomid;
-		pomelo.app.rpc.matchGlobal.matchRemote.leaveGoldRoom(null, gameType, stage, goldRoomId, uid, null);
+		pomelo.app.rpc.matchGlobal.matchRemote.leaveGoldRoom(null, gameType, stage, goldRoomId, uid, function (resp) {
+			// 向其它人广播离开消息
+			let route = 'onLeaveRoom';
+			let msg = {wChairID: wChairID};
+			self._notifyMsgToOtherMem(null, route, msg);
+		});
 
 	} else {
 		// 解散房间
-		next(null, {code: consts.LeaveRoomCode.LEAVE_ROOM_DISSOLVE});
 		this.destroy();
 	}
 };
@@ -734,5 +733,20 @@ pro.destroy = function () {
 			pomelo.app.rpc.connector.entryRemote.onGoldDissolveGame.toServer(preServerID, user.id, null);
 		}
 	}
+
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			let sid = user.preSid;
+			let route = 'onLeaveRoom';
+			let msg = {wChairID: key}
+			let uids = [{
+				uid: user.id,
+				sid: sid
+			}]
+			messageService.pushMessageByUids(uids, route, msg);
+		}
+	}
+
 	Entity.prototype.destroy.call(this);
 };
