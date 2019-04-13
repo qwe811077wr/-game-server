@@ -48,7 +48,7 @@ pro.joinGoldRoom = function (roomid, usrInfo, cb) {
 			resp["code"] = consts.RoomCode.FULL_PLAYER_ROOM;
 		} else {
 			// 加入
-			let chairID = goldEntity.roomInfo.players.length;
+			let chairID = goldEntity.getEnterPlayerChairID();
 			goldEntity.addUserToPlayers(usrInfo, chairID);
 			resp["code"] = consts.RoomCode.OK;
 			resp["roomInfo"] = goldEntity.clientEnterInfo(usrInfo.id);

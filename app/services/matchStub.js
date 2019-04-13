@@ -165,12 +165,14 @@ pro._updateRoomInfo = function (gameType, stage, roomInfo) {
 // 房间有人退出
 pro._removeUserRoomInfo = function (gameType, stage, roomid, uid) {
 	let roomInfo = this.matchInfo[gameType][stage][roomid];
-	let userInfo = roomInfo.players;
-	for (let i = 0; i < userInfo.length; i++) {
-		const user = userInfo[i];
-		if (uid == user.id) {
-			roomInfo.players.splice(i, 1);
-			break;
+	let players = roomInfo.players;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (uid == user.id) {
+				delete players[key];
+				break;
+			}
 		}
 	}
 	logger.info('离开玩家与剩余玩家:',uid, this.matchInfo[gameType][stage][roomid].players);
@@ -213,7 +215,7 @@ pro._startMatchRobot = function (gameType, stage) {
 	let roomList = this.matchInfo[gameType][stage];
 	for (let i in roomList) {
 		const roomInfo = roomList[i];
-		let remainPlayerCount = 3 - roomInfo.players.length;
+		let remainPlayerCount = 3 - Object.keys(roomInfo.players).length;
 		for (let index = 0; index < remainPlayerCount; index++) {
 			// 填充机器人加入
 			let toServerId = roomInfo.toServerId;
@@ -250,9 +252,11 @@ pro._enterRoomCtr = function (usrInfo, roomInfo) {
 
 pro._notifyMsgToAllUser = function (players, route, msg) {
 	var uids = [];
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-        uids.push({uid: user.id, sid: user.preSid});
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			uids.push({uid: user.id, sid: user.preSid});
+		}
 	}
     if (uids.length) {
         messageService.pushMessageByUids(uids, route, msg);
@@ -260,10 +264,12 @@ pro._notifyMsgToAllUser = function (players, route, msg) {
 };
 
 pro._getUserInfoByUid = function (uid, players) {
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-		if (uid == user.id) {
-			return user;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (uid == user.id) {
+				return user;
+			}
 		}
 	}
 };
@@ -271,11 +277,13 @@ pro._getUserInfoByUid = function (uid, players) {
 pro.dissolveGoldRoom = function (gameType, stage, goldRoomId, cb) {
 	let roomInfo = this._findRoomInfo(gameType, stage, goldRoomId);
 	let players = roomInfo.players;
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-		if (common.isRobot(user.openid)) {
-			// 机器人自动加入准备列表
-			this._addRobotToReadyList(gameType, stage, user);
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (common.isRobot(user.openid)) {
+				// 机器人自动加入准备列表
+				this._addRobotToReadyList(gameType, stage, user);
+			}
 		}
 	}
 	this._removeRoomInfo(gameType, stage, goldRoomId);
@@ -285,14 +293,17 @@ pro.dissolveGoldRoom = function (gameType, stage, goldRoomId, cb) {
 pro.leaveGoldRoom = function (gameType, stage, goldRoomId, uid, cb) {
 	let roomInfo = this._findRoomInfo(gameType, stage, goldRoomId);
 	let players = roomInfo.players;
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-		if (uid == user.id && common.isRobot(user.openid)) {
-			// 机器人自动加入准备列表
-			this._addRobotToReadyList(gameType, stage, user);
-			break;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (uid == user.id && common.isRobot(user.openid)) {
+				// 机器人自动加入准备列表
+				this._addRobotToReadyList(gameType, stage, user);
+				break;
+			}
 		}
 	}
+
 	this._removeUserRoomInfo(gameType, stage, goldRoomId, uid);
 	cb();
 };

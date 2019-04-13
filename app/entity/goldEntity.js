@@ -35,7 +35,7 @@ pro.initGoldRoom = function (usrInfo, gameType, stage) {
 		status: consts.TableStatus.INIT,
 		gameType: gameType || consts.GameType.PDK_16,
 		stage: stage,
-		players: [],
+		players: {},
 		//游戏开始卡牌信息
 		cardInfo:{
 			handCardData: [0, 0, 0],   	//手牌
@@ -66,36 +66,40 @@ pro.clientEnterInfo = function (uid) {
 
 pro._getChairIDByUid = function (uid) {
 	let players = this.roomInfo.players;
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-		if (uid == user.id) {
-			return user.chairID;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (uid == user.id) {
+				return user.chairID;
+			}
 		}
 	}
 };
 
 pro._getUidByChairID = function (chairID) {
 	let players = this.roomInfo.players;
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-		if (chairID == user.chairID) {
-			return user.id;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (chairID == user.chairID) {
+				return user.id;
+			}
 		}
 	}
 };
 
 pro.checkFullMember = function () {
-	if (this.roomInfo) {
-		if (this.roomInfo.players.length >= 3) {
-			return true;
-		}
+	let players = Object.keys(this.roomInfo.players);
+	let len = players.length;
+	if (len >= 3) {
+		return true;
 	}
 	return false;
 };
 
 pro.addUserToPlayers = function (usrInfo, chairID) {
-	if (chairID != this.roomInfo.players.length) {
-		this.logger.error('add user error', chairID, usrInfo, this.roomInfo.players);
+	if (!(chairID >= 0 && chairID < 3)) {
+		this.logger.error('add user chairId error', chairID);
 		return;
 	}
 
@@ -112,29 +116,44 @@ pro.addUserToPlayers = function (usrInfo, chairID) {
 		autoState: consts.AutoState.AutoNo,
 		openid: usrInfo.openid
 	};
-	this.roomInfo.players.push(playerInfo);
+	this.roomInfo.players[chairID] = playerInfo;
 };
 
 pro.removeUserInPlayers = function (uid) {
-	let userInfo = this.roomInfo.players;
-	for (let i = 0; i < userInfo.length; i++) {
-		const user = userInfo[i];
-		if (uid == user.id) {
-			this.roomInfo.players.splice(i, 1);
-			break;
+	let players = this.roomInfo.players;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (uid == user.id) {
+				delete players[key];
+				break;
+			}
 		}
 	}
 };
 
 pro.updateUserToPlayers = function (usrInfo) {
-	for (let i = 0; i < this.roomInfo.players.length; i++) {
-		let user = this.roomInfo.players[i];
-		if (user.id == usrInfo.id) {
-			user.coins = usrInfo.coins;
-			user.gems = usrInfo.gems;
-			break;
+	let players = this.roomInfo.players;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (usrInfo.id == user.id) {
+				user.coins = usrInfo.coins;
+				user.gems = usrInfo.gems;
+				break;
+			}
 		}
 	}
+};
+
+pro.getEnterPlayerChairID = function () {
+	let players = this.roomInfo.players;
+	for (let i = 0; i < 3; i++) {
+		if (!players.hasOwnProperty(i)) {
+			return i;
+		}
+	}
+	this.logger.error('getEnterPlayerChairID error = ', players);
 };
 
 pro.readyGame = function (uid, next) {
@@ -192,10 +211,12 @@ pro.setPlayerReadyState = function (uid, state) {
 pro.getPlayerReadyCount = function () {
 	let players = this.roomInfo.players;
 	let count = 0;
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-		if (user.readyState === consts.ReadyState.Ready_Yes) {
-			count = count + 1;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (user.readyState === consts.ReadyState.Ready_Yes) {
+				count = count + 1;
+			}
 		}
 	}
 	return count;
@@ -232,21 +253,24 @@ pro._startGame = function () {
     this.roomInfo.cardInfo.currentUser = banker;
 	
 	// 游戏开始,通知发牌
-	for (let i = 0; i < this.roomInfo.players.length; i++) {
-		const user = this.roomInfo.players[i];
-		let sid = user.preSid;
-		let route = 'onStartGame';
-		let msg = {
-			wCurrentUser: banker,
-			cbCardData: handCardData[i],
-			wChairID: i
+	let players = this.roomInfo.players;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			let sid = user.preSid;
+			let route = 'onStartGame';
+			let msg = {
+				wCurrentUser: banker,
+				cbCardData: handCardData[key],
+				wChairID: key
+			}
+			let uids = [{
+				uid: user.id,
+				sid: sid
+			}]
+			messageService.pushMessageByUids(uids, route, msg);
+			this.logger.info("name[%s] sid[%s] msg[%s]", user.name, sid, route);
 		}
-		let uids = [{
-			uid: user.id,
-			sid: sid
-		}]
-		messageService.pushMessageByUids(uids, route, msg);
-		this.logger.info("name[%s] sid[%s] msg[%s]", user.name, sid, route);
 	}
 	this._startAutoSchedule(20, 0.5);
 };
@@ -395,10 +419,12 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		this._resetRoomData();
 
 		// 修改数据库金币数
-		for (let i = 0; i < this.roomInfo.players.length; i++) {
-			const user = this.roomInfo.players[i];
-			let preServerID = user.preSid;
-			pomelo.app.rpc.connector.entryRemote.onUpdateUsrCoins.toServer(preServerID, user.id, user.coins, null);
+		for (const key in this.roomInfo.players) {
+			if (this.roomInfo.players.hasOwnProperty(key)) {
+				const user = this.roomInfo.players[key];
+				let preServerID = user.preSid;
+				pomelo.app.rpc.connector.entryRemote.onUpdateUsrCoins.toServer(preServerID, user.id, user.coins, null);
+			}
 		}
 
 	} else {
@@ -564,17 +590,19 @@ pro._broadcastOutCardNotify = function (currentUser) {
 // uid 为空向队伍里所有人推送, 否则指定uid推送
 pro._notifyMsgToOtherMem = function (uid, route, msg) {
 	var uids = [];
-	for (let i = 0; i < this.roomInfo.players.length; i++) {
-		const user = this.roomInfo.players[i];
-		if (uid) {
-			if (user.id == uid) {
+	for (const key in this.roomInfo.players) {
+		if (this.roomInfo.players.hasOwnProperty(key)) {
+			const user = this.roomInfo.players[key];
+			if (uid) {
+				if (user.id == uid) {
+					let preServerID = user.preSid;
+					uids.push({uid: user.id, sid: preServerID});
+					break;
+				}
+			} else {
 				let preServerID = user.preSid;
 				uids.push({uid: user.id, sid: preServerID});
-				break;
 			}
-		} else {
-			let preServerID = user.preSid;
-			uids.push({uid: user.id, sid: preServerID});
 		}
 	}
 
@@ -585,11 +613,14 @@ pro._notifyMsgToOtherMem = function (uid, route, msg) {
 
 // 设置托管状态
 pro._setAutoState = function (wChairID, state) {
+	let players = this.roomInfo.players;
 	if (wChairID) {
-		this.roomInfo.players[wChairID].autoState = state;
+		players[wChairID].autoState = state;
 	} else {
-		for (let i = 0; i < this.roomInfo.players.length; i++) {
-			this.roomInfo.players[i].autoState = state;
+		for (const key in players) {
+			if (players.hasOwnProperty(key)) {
+				players[key].autoState = state;
+			}
 		}
 	}
 };
@@ -692,13 +723,14 @@ pro.destroy = function () {
 	let gameType = this.roomInfo.gameType;
 	let stage = this.roomInfo.stage;
 	let goldRoomId = this.roomInfo.roomid;
-	let players = this.roomInfo.players;
 	pomelo.app.rpc.matchGlobal.matchRemote.dissolveGoldRoom(null, gameType, stage, goldRoomId, null);
-
-	for (let i = 0; i < players.length; i++) {
-		const user = players[i];
-		let preServerID = user.preSid;
-		pomelo.app.rpc.connector.entryRemote.onGoldDissolveGame.toServer(preServerID, user.id, null);
+	let players = this.roomInfo.players;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			let preServerID = user.preSid;
+			pomelo.app.rpc.connector.entryRemote.onGoldDissolveGame.toServer(preServerID, user.id, null);
+		}
 	}
 	Entity.prototype.destroy.call(this);
 };
