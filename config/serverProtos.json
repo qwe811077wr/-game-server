@@ -15,7 +15,7 @@
 	},
 
 	"onLeaveRoom": {
-		"required uInt32 uid": 1
+		"required uInt32 wChairID": 1
 	},
 
 	"onReadyGame": {

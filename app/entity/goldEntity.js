@@ -156,6 +156,20 @@ pro.getEnterPlayerChairID = function () {
 	this.logger.error('getEnterPlayerChairID error = ', players);
 };
 
+pro.getPlayerReadyCount = function () {
+	let players = this.roomInfo.players;
+	let count = 0;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (user.readyState === consts.ReadyState.Ready_Yes) {
+				count = count + 1;
+			}
+		}
+	}
+	return count;
+};
+
 pro.readyGame = function (uid, next) {
 	let roomState = this.roomInfo.status;
 	if (roomState == consts.TableStatus.START) {
@@ -202,24 +216,12 @@ pro.setPlayerReadyState = function (uid, state) {
 		let wChairID = this._getChairIDByUid(uid);
 		this.roomInfo.players[wChairID].readyState = state;
 	} else {
-		for (let i = 0; i < players.length; i++) {
-			this.roomInfo.players[i].readyState = state;
-		}
-	}
-};
-
-pro.getPlayerReadyCount = function () {
-	let players = this.roomInfo.players;
-	let count = 0;
-	for (const key in players) {
-		if (players.hasOwnProperty(key)) {
-			const user = players[key];
-			if (user.readyState === consts.ReadyState.Ready_Yes) {
-				count = count + 1;
+		for (const key in players) {
+			if (players.hasOwnProperty(key)) {
+				players[key].readyState = state;
 			}
 		}
 	}
-	return count;
 };
 
 // 游戏开始
@@ -703,7 +705,7 @@ pro.leaveRoom = function (uid, next) {
 
 		// 向其它人广播离开消息
 		let route = 'onLeaveRoom';
-		let msg = {uid: uid};
+		let msg = {wChairID: wChairID};
 		this._notifyMsgToOtherMem(null, route, msg);
 
 		let gameType = this.roomInfo.gameType;
