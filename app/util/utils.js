@@ -7,88 +7,88 @@ var isPrintFlag = false;
 /**
  * Check and invoke callback function
  */
-utils.invokeCallback = function(cb) {
-  if(!!cb && typeof cb === 'function') {
-    cb.apply(null, Array.prototype.slice.call(arguments, 1));
-  }
+utils.invokeCallback = function (cb) {
+    if (!!cb && typeof cb === 'function') {
+        cb.apply(null, Array.prototype.slice.call(arguments, 1));
+    }
 };
 
 /**
  * clone an object
  */
-utils.clone = function(obj) {
-	var o;
-	if (typeof obj == "object") {
-		if (obj === null) {
-			o = null;
-		} else {
-			if (obj instanceof Array) {
-				o = [];
-				for (var i = 0, len = obj.length; i < len; i++) {
-					o.push(utils.clone(obj[i]));
-			}
-			} else {
-				o = {};
-				for (var j in obj) {
-					o[j] = utils.clone(obj[j]);
-				}
-			}
-		}
-	} else {
-		o = obj;
-	}
-	return o;
+utils.clone = function (obj) {
+    var o;
+    if (typeof obj == "object") {
+        if (obj === null) {
+            o = null;
+        } else {
+            if (obj instanceof Array) {
+                o = [];
+                for (var i = 0, len = obj.length; i < len; i++) {
+                    o.push(utils.clone(obj[i]));
+                }
+            } else {
+                o = {};
+                for (var j in obj) {
+                    o[j] = utils.clone(obj[j]);
+                }
+            }
+        }
+    } else {
+        o = obj;
+    }
+    return o;
 };
 
-utils.size = function(obj) {
-  if(!obj) {
-    return 0;
-  }
-
-  var size = 0;
-  for(var f in obj) {
-    if(obj.hasOwnProperty(f)) {
-      size++;
+utils.size = function (obj) {
+    if (!obj) {
+        return 0;
     }
-  }
 
-  return size;
+    var size = 0;
+    for (var f in obj) {
+        if (obj.hasOwnProperty(f)) {
+            size++;
+        }
+    }
+
+    return size;
 };
 
 // print the file name and the line number ~ begin
-function getStack(){
-  var orig = Error.prepareStackTrace;
-  Error.prepareStackTrace = function(_, stack) {
+function getStack() {
+    var orig = Error.prepareStackTrace;
+    Error.prepareStackTrace = function (_, stack) {
+        return stack;
+    };
+    var err = new Error();
+    Error.captureStackTrace(err, arguments.callee);
+    var stack = err.stack;
+    Error.prepareStackTrace = orig;
     return stack;
-  };
-  var err = new Error();
-  Error.captureStackTrace(err, arguments.callee);
-  var stack = err.stack;
-  Error.prepareStackTrace = orig;
-  return stack;
 }
 
 function getFileName(stack) {
-  return stack[1].getFileName();
+    return stack[1].getFileName();
 }
 
-function getLineNumber(stack){
-  return stack[1].getLineNumber();
+function getLineNumber(stack) {
+    return stack[1].getLineNumber();
 }
 
-utils.myPrint = function() {
-  if (isPrintFlag) {
-    var len = arguments.length;
-    if(len <= 0) {
-      return;
+utils.myPrint = function () {
+    if (isPrintFlag) {
+        var len = arguments.length;
+        if (len <= 0) {
+            return;
+        }
+        var stack = getStack();
+        var aimStr = '\'' + getFileName(stack) + '\' @' + getLineNumber(stack) + ' :\n';
+        for (var i = 0; i < len; ++i) {
+            aimStr += arguments[i] + ' ';
+        }
+        console.log('\n' + aimStr);
     }
-    var stack = getStack();
-    var aimStr = '\'' + getFileName(stack) + '\' @' + getLineNumber(stack) + ' :\n';
-    for(var i = 0; i < len; ++i) {
-      aimStr += arguments[i] + ' ';
-    }
-    console.log('\n' + aimStr);
-  }
 };
 // print the file name and the line number ~ end
 
@@ -99,7 +99,7 @@ utils.getObjectClass = function (obj) {
          * for browsers which have name property in the constructor
          * of the object,such as chrome
          */
-        if(obj.constructor.name) {
+        if (obj.constructor.name) {
             return obj.constructor.name;
         }
         var str = obj.constructor.toString();
@@ -107,8 +107,7 @@ utils.getObjectClass = function (obj) {
          * executed if the return of object.constructor.toString() is
          * "[object objectClass]"
          */
-        if(str.charAt(0) == '[')
-        {
+        if (str.charAt(0) == '[') {
             var arr = str.match(/\[\w+\s*(\w+)\]/);
         } else {
             /*
@@ -125,12 +124,12 @@ utils.getObjectClass = function (obj) {
     return undefined;
 };
 
-String.prototype.format = function(args) {
+String.prototype.format = function (args) {
     var result = this;
     if (arguments.length > 0) {
         if (arguments.length == 1 && typeof (args) == "object") {
             for (var key in args) {
-                if(args[key]!=undefined){
+                if (args[key] != undefined) {
                     var reg = new RegExp("({" + key + "})", "g");
                     result = result.replace(reg, args[key]);
                 }
@@ -139,7 +138,7 @@ String.prototype.format = function(args) {
         else {
             for (var i = 0; i < arguments.length; i++) {
                 if (arguments[i] != undefined) {
-                    var reg= new RegExp("({)" + i + "(})", "g");
+                    var reg = new RegExp("({)" + i + "(})", "g");
                     result = result.replace(reg, arguments[i]);
                 }
             }
@@ -148,7 +147,7 @@ String.prototype.format = function(args) {
     return result;
 };
 
-utils.isEmptyObject = function (obj){
+utils.isEmptyObject = function (obj) {
     for (let n in obj) {
         return false;
     }

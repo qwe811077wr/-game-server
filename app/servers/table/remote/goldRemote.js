@@ -38,9 +38,9 @@ pro.joinGoldRoom = function (roomid, usrInfo, cb) {
 	let resp = {};
 	let goldEntity = entityManager.getEntity(roomid);
 	if (goldEntity) {
-		goldEntity.updateUserToPlayers(usrInfo);
-		if (usrInfo.goldRoomId === roomid) {
-			// 已经在房间里
+		if (goldEntity.checkRooming(usrInfo.id)) {
+            // 已经在房间里
+            goldEntity.updateUserToPlayers(usrInfo);
 			resp["code"] = consts.RoomCode.OK;
 			resp["roomInfo"] = goldEntity.clientEnterInfo(usrInfo.id);
 		} else if (goldEntity.checkFullMember()) {

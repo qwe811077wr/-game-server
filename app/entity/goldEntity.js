@@ -97,6 +97,19 @@ pro.checkFullMember = function () {
 	return false;
 };
 
+pro.checkRooming = function (uid) {
+    let players = this.roomInfo.players;
+	for (const key in players) {
+		if (players.hasOwnProperty(key)) {
+			const user = players[key];
+			if (uid == user.id) {
+				return true;
+			}
+		}
+    }
+    return false;
+};
+
 pro.addUserToPlayers = function (usrInfo, chairID) {
 	if (!(chairID >= 0 && chairID < 3)) {
 		this.logger.error('add user chairId error', chairID);
