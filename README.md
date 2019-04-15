@@ -1,4 +1,15 @@
-﻿
+﻿# 【游戏框架】
+[server]
+	|--> frontserver(前端服务器)		
+			|--> gate(网关,负责connector的负载均衡)
+			|--> connector(定义各模块接口)
+
+	|-->backserver(后端服务器)
+			|--> xxRemote(模块逻辑, 一般只有remote, 接收connector对应接口路由)
+			|--> game1(子游戏1)
+			|--> game2
+			...
+
 #【快速搭载http服务】
 python -m SimpleHTTPServer 9999
 
@@ -21,6 +32,8 @@ python -m SimpleHTTPServer 9999
 5.重启gitlab服务 sudo gitlab-ctl restart (如果有timeout再试一次) (sudo gitlab-ctl stop/restart)
 6.浏览器访问url,第一次重设密码
 7.安装git,生成ssh key,并配置
+
+####################################################################
 
 #【常用操作】
 1.pomelo启动环境选择与开启守护进程:pomelo start -e production [-D -d -t -i]
