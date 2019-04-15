@@ -8,6 +8,7 @@ let utils = require('../../node_modules/pomelo/lib/util/utils');
 let Constants = require('../../node_modules/pomelo/lib/util/constants');
 let logger = require('pomelo-logger').getLogger('game', __filename);
 let entityMgr = _require('../services/entityManager');
+let async = require('async');
 
 module.exports = function (opts) {
     return new Module(opts);
@@ -48,7 +49,19 @@ Module.prototype.monitorHandler = function (agnet, msg, cb) {
                 }
             }
             utils.invokeCallback(cb, null);
-            break;
+			break;
+		case 'goldMatch':
+			let matchStub = app.get('matchStub');
+			let info = {};
+			if (matchStub) {
+				info.matchInfo = matchStub.matchInfo;
+				info.robotList = matchStub.robotList;
+			}
+			cb(null, {
+				serverId: agnet.id,
+        		body    : info
+			});
+			break;
         default:
             logger.error('receive error signal: %j', msg);
     }
@@ -63,7 +76,10 @@ Module.prototype.clientHandler = function (agent, msg, cb) {
             break;
         case 'kick':
             kick(app, agent, msg, cb);
-            break;
+			break;
+		case 'goldMatch':
+			goldMatch(app, agent, msg, cb);
+			break;
         default:
             logger.error('game operation unknow signal: ' + msg.signal);
             utils.invokeCallback(cb, new Error('The command cannot be recognized, please check.'), null);
@@ -102,5 +118,28 @@ var kick = function (app, agent, msg, cb) {
     for(let sid in connectorServers) {
         let record = connectorServers[sid];
         agent.request(record.id, module.exports.moduleId, msg, callback);
+    }
+};
+
+var goldMatch = function (app, agent, msg, cb) {
+    var servers = app.getServersByType('matchGlobal');
+    var matchInfo = {};
+    if(servers){
+        async.mapSeries(servers,function(server,callback){
+            agent.request(server.id, module.exports.moduleId, msg, function(err,info){
+                if(err){
+                    cb(null,{body : 'err'});
+                    return;
+                }
+                matchInfo[server.id] = info.body;
+                callback();
+            });
+        },function(err,res){
+            cb(null,{
+                body : matchInfo
+            });
+        });
+    }else{
+        cb(null,{body : matchInfo});
     }
 };

@@ -41,10 +41,10 @@ function onlineAvatar(opts) {
 
 let arguments = process.argv.splice(2);
 let opts = {
-    username: arguments[1],
-    password: arguments[2],
-    host: arguments[3],
-    port: arguments[4],
+    username: arguments[0],
+    password: arguments[1],
+    host: arguments[2],
+    port: arguments[3],
 };
 
 onlineAvatar(opts);
