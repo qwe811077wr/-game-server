@@ -1,5 +1,5 @@
 ﻿# 【游戏框架】
-[server]
+server:
 	|--> frontserver(前端服务器)
 		|--> gate(网关,负责connector的负载均衡)
 		|--> connector(定义各模块接口)
