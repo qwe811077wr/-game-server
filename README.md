@@ -1,8 +1,8 @@
 ﻿# 【游戏框架】
 [server]
-	|--> frontserver(前端服务器)		
-			|--> gate(网关,负责connector的负载均衡)
-			|--> connector(定义各模块接口)
+	|--> frontserver(前端服务器)
+		|--> gate(网关,负责connector的负载均衡)
+		|--> connector(定义各模块接口)
 
 	|-->backserver(后端服务器)
 			|--> xxRemote(模块逻辑, 一般只有remote, 接收connector对应接口路由)
