@@ -21,12 +21,23 @@ function goldMatchStatistics(opts) {
 						let array = matchInfo[id];
 						for (let i = 0; i < array.length; i++) {
 							const stages = array[i];
-							let count = 0;
+							let realnum = 0;
+							let robotnum = 0;
 							for (const roomid in stages) {
 								let roomInfo = stages[roomid];
-								count = count + Object.keys(roomInfo.players).length;
+								let num1 = 0;
+								let num2 = 0;
+								for (const k in roomInfo.players) {
+									if (isRobot(roomInfo.players[k].openid)) {
+										num1 = num1 + 1;
+									}
+								}
+								num2 = Object.keys(roomInfo.players).length - num1;
+								realnum = realnum + num2;
+								robotnum = robotnum + num1;
 							}
-							console.log(id + '-' + i + ' room = ' + Object.keys(stages).length + ' players = ' + count);
+							let roomnum = Object.keys(stages).length;
+							console.log(id + '-' + i + ' roomnum = ' + roomnum + ' realnum = ' + realnum + ' robotnum = ' + robotnum);
 						}
 					}
 				}
@@ -46,6 +57,13 @@ function goldMatchStatistics(opts) {
             process.exit(0);
         })
     });
+};
+
+var isRobot = function (openid) {
+	if (openid.indexOf("robot_") != -1) {
+		return true;
+	}
+	return false;
 };
 
 let arguments = process.argv.splice(2);
