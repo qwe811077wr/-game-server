@@ -34,11 +34,17 @@ function connectToMaster(id, opts, cb) {
 function reload(opts) {
     var id = 'pomelo_reload_' + Date.now();
     connectToMaster(id, opts, function(client) {
-        client.request(co.moduleId, { signal: 'reload', hotFile: opts.hotFile }, function(err) {
+        client.request(co.moduleId, { signal: 'reload', hotFile: opts.hotFile }, function(err, msg) {
             if(err) {
                 console.error(err);
             }
             else {
+				let msg2 = msg.msg;
+				for (const key in msg2) {
+					for (let i = 0; i < msg2[key].length; i++) {
+						console.log('update ' + '[' + key + '] ' + msg2[key][i]);
+					}
+				}
                 console.info("reload finish");
             }
             process.exit(0);

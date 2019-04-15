@@ -17,6 +17,8 @@ const ignoreProp = new Set([
     '_maxListeners'
 ]);
 
+let rsvFrontHotInfo = [];
+
 /**
  * The cache for storing hot module
  * @name {Object} hotModuleCache
@@ -118,7 +120,8 @@ function checkAndUpdate(moduleId, isOnly) {
         } catch (err) {
             console.log(err);
         }
-        cloneModule(moduleCache, moduleEntity);
+		cloneModule(moduleCache, moduleEntity);
+		rsvFrontHotInfo.push(moduleId);
         console.log('update js: ' + moduleId);
     }
 }
@@ -168,7 +171,8 @@ const _require = function( modulePath ) {
 }
 
 // 主动热更
-var _reload = function (hotFile) {
+var _reload = function (hotFile, cb) {
+	rsvFrontHotInfo = [];
     if (hotFile) {
         for (const moduleId in hotModuleCache) {
             let fileName =  path.basename(moduleId);
@@ -181,7 +185,8 @@ var _reload = function (hotFile) {
         for (var moduleId in hotModuleCache) {
             checkAndUpdate(moduleId);
         }
-    }
+	}
+	cb(rsvFrontHotInfo);
 }
 
 /**
