@@ -58,6 +58,15 @@ pro.enterGoldRoom = function (gameType, stage, next) {
 	});
 };
 
+// 重连加入
+pro.joinGoldRoom = function (goldRoomId, next) {
+	let usrInfo = this.entity.clientLoginInfo();
+	usrInfo.preSid = this.entity.serverId;
+	pomelo.app.rpc.matchGlobal.matchRemote.joinGoldRoom(null, goldRoomId, usrInfo, function (resp) {
+		next(null, resp);
+	});
+};
+
 pro._checkValid = function (gameType, stage) {
 	if (gameType == consts.GameType.PDK_15 && stage >= 0 && stage < consts.Pdk15StageCount) {
 		return true;

@@ -9,7 +9,7 @@
 			"request": "attach",
 			"name": "Remote",
 			"address": "127.0.0.1",
-			"port": 10005,
+			"port": 10006,
 			"localRoot": "",  //"${workspaceFolder}",
 			//"remoteRoot": "/home/kzyx/game-server"
 		},

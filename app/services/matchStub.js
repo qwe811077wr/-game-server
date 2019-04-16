@@ -102,6 +102,10 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 		toServerId = res.id;
 	}
 
+	if (common.isRobot(usrInfo.openid)) {
+		usrInfo.coins = this._getRobotRandCoins(gameType, stage);
+	}
+
 	pomelo.app.rpc.table.goldRemote.enterGoldRoom.toServer(toServerId, gameType, stage, usrInfo, function (resp) {
 		cb(resp);
 		if (resp.code == consts.RoomCode.OK) {
@@ -111,6 +115,28 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 			self._enterRoomCtr(usrInfo, roomInfo);
 		}
 	});
+};
+
+// 重连加入
+pro.joinGoldRoom = function (goldRoomId, userInfo, cb) {
+	let self = this;
+	let roomInfo = this._findRoomInfoEx(goldRoomId);
+	if (roomInfo) {
+		let gameType = roomInfo.gameType;
+		let stage = roomInfo.stage;
+		let toServerId = roomInfo.toServerId;
+		pomelo.app.rpc.table.goldRemote.joinGoldRoom.toServer(toServerId, goldRoomId, userInfo, function (resp) {
+			if (resp.code == consts.RoomCode.OK) {
+				let roomInfo = resp.roomInfo;
+				roomInfo.toServerId = toServerId;
+				self._updateRoomInfo(gameType, stage, roomInfo);
+				self._enterRoomCtr(userInfo, roomInfo);
+			} 
+			cb(resp);
+		});
+	} else {
+		cb({code: consts.RoomCode.NO_EXIST_ROOM});
+	}
 };
 
 // 机器人添加进准备列表
@@ -176,8 +202,8 @@ pro._findRoomInfoEx = function (roomid) {
 			const rooms = this.matchInfo[idx];
 			for (const id in rooms) {
 				if (rooms.hasOwnProperty(id)) {
-					const roomInfo = rooms[id];
-					if (roomInfo.roomid == roomid) {
+					const roomInfo = rooms[id][roomid];
+					if (roomInfo) {
 						return roomInfo;
 					}
 				}

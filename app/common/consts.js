@@ -111,6 +111,7 @@ module.exports = {
 		GAEM_TYPE_INVALID: 1,  // 游戏类型不存在
 		EXIST_IN_GAME: 2, 	//已经在游戏中了
 		STAGE_COINS_LOW: 3, //阶梯金币数量不满足
+		ROOM_NO_EXIST: 4,  //房间已经解散
 	},
 
 	// 游戏类型

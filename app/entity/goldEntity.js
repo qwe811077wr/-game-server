@@ -146,6 +146,7 @@ pro.removeUserInPlayers = function (uid) {
 };
 
 pro.updateUserToPlayers = function (usrInfo) {
+	let isExist = false;
 	let players = this.roomInfo.players;
 	for (const key in players) {
 		if (players.hasOwnProperty(key)) {
@@ -153,9 +154,15 @@ pro.updateUserToPlayers = function (usrInfo) {
 			if (usrInfo.id == user.id) {
 				user.coins = usrInfo.coins;
 				user.gems = usrInfo.gems;
+				isExist = true;
 				break;
 			}
 		}
+	}
+
+	if (!isExist) {
+		let chairID = this.getEnterPlayerChairID();
+		this.addUserToPlayers(usrInfo, chairID);
 	}
 };
 

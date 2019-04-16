@@ -22,6 +22,10 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 	this.app.get('matchStub').enterGoldRoom(gameType, stage, usrInfo, cb);
 };
 
+pro.joinGoldRoom = function (goldRoomId, userInfo, cb) {
+	this.app.get('matchStub').joinGoldRoom(goldRoomId, userInfo, cb);
+};
+
 pro.dissolveGoldRoom = function (gameType, stage, goldRoomId, cb) {
 	this.app.get('matchStub').dissolveGoldRoom(gameType, stage, goldRoomId, cb);
 };

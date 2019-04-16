@@ -26,3 +26,9 @@ handler.enterGoldRoom = function (msg, session, next) {
 	let stage = msg.stage;
 	session.avatar.match.enterGoldRoom(gameType, stage, next);
 };
+
+// 重连加入
+handler.joinGoldRoom = function (msg, session, next) {
+	let goldRoomId = msg.goldRoomId;
+	session.avatar.match.joinGoldRoom(goldRoomId, next);
+};
