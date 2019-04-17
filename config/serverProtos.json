@@ -75,6 +75,6 @@
 
 	"onUpdateGoldCoins": {
 		"repeated uInt32 remains": 1,
-		"repeated uInt32 changes": 2
+		"repeated sInt32 changes": 2
 	}
 }
