@@ -62,6 +62,12 @@ Module.prototype.monitorHandler = function (agnet, msg, cb) {
         		body    : info
 			});
 			break;
+		case 'dissolve':
+			let entity = entityMgr.getEntity(msg.roomId);
+			if (entity) {
+				entity.destroy();
+			}
+			utils.invokeCallback(cb, null);
         default:
             logger.error('receive error signal: %j', msg);
     }
@@ -79,6 +85,9 @@ Module.prototype.clientHandler = function (agent, msg, cb) {
 			break;
 		case 'goldMatch':
 			goldMatch(app, agent, msg, cb);
+			break;
+		case 'dissolve':
+			dissolveRoom(app, agent, msg, cb);
 			break;
         default:
             logger.error('game operation unknow signal: ' + msg.signal);
@@ -141,5 +150,24 @@ var goldMatch = function (app, agent, msg, cb) {
         });
     }else{
         cb(null,{body : matchInfo});
+    }
+};
+
+var dissolveRoom = function(app, agent, msg, cb) {
+	var servers = app.getServersByType('table');
+    if(servers){
+        async.mapSeries(servers,function(server,callback){
+            agent.request(server.id, module.exports.moduleId, msg, function(err,info){
+                if(err){
+                    cb(null,{body : 'err'});
+                    return;
+                }
+                callback();
+            });
+        },function(err,res){
+            cb(null,{body: 'finish.'});
+        });
+    }else{
+        cb(null,{body : 'finish.'});
     }
 };
