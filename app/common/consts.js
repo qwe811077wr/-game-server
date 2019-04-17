@@ -4,8 +4,8 @@
  * Description: 常量文件
  */
 module.exports = {
-	APP_ID: "wx6e08467553158527",
-    APP_SECRET: "4c5ce70f86af49bd8eba1901ff1adc62",
+	APP_ID: "wxea1ac2da57ebd9a0",
+    APP_SECRET: "c669048af98c0236b5fc26364a261b15",
 
 	ENABLE_GM: true,
 	
