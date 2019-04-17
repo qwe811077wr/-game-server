@@ -11,6 +11,7 @@ var dispatcher = _require('../util/dispatcher');
 let messageService = _require('../services/messageService');
 let stageCfg = _require('../common/stage');
 let common = require('../common/common');
+let utils = require('../util/utils');
 
 var instance = null;
 
@@ -68,7 +69,7 @@ pro.getMatchInfo = function (gameType, cb) {
 
 	let gameInfo = [];
 	for (const i in robotList) {
-		let info = stageCfg[gameType][i];
+		let info = utils.clone(stageCfg[gameType][i]);
 		info.peopleNum = info.peopleNum + robotList[i].length;
 		gameInfo.push(info);
 	}

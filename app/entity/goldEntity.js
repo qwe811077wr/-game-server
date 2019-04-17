@@ -432,22 +432,25 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	this._broadcastOutCardMsg(wChairID, bCardData, bCardCount, cardInfo.currentUser);
 	this.logger.info('当前:[%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 
-	if (cardInfo.currentUser == consts.InvalUser) {
-		// 结算消息
-		this.logger.info('赢家: [%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
-		this._broadcastSettlementMsg(wChairID);
+	// 炸弹扣分
+	if (bCardType == pdkHelper.CardType.CT_BOMB_CARD) {
+		let underScore = stageCfg[this.roomInfo.gameType][this.roomInfo.stage].underScore;
+		let bombData = this._getBombCoins(wChairID, 5 * underScore);
+		let changes = bombData.changes;
+		let remains = bombData.remains;
+		this._broadcastRefreshCoins(remains, changes);
+	}
 
+	if (cardInfo.currentUser == consts.InvalUser) {
+		this.logger.info('赢家: [%d](%s), 出牌:', wChairID, this.roomInfo.players[wChairID].name, bCardData);
 		// 重置房间数据
 		this._resetRoomData();
-
-		// 修改数据库金币数
-		for (const key in this.roomInfo.players) {
-			if (this.roomInfo.players.hasOwnProperty(key)) {
-				const user = this.roomInfo.players[key];
-				let preServerID = user.preSid;
-				pomelo.app.rpc.connector.entryRemote.onUpdateUsrCoins.toServer(preServerID, user.id, user.coins, null);
-			}
-		}
+		// 结算消息
+		let settleData = this._getSettlementCoins(wChairID);
+		let changes = settleData.changes;
+		let remains = settleData.remains;
+		this._broadcastSettlementMsg(wChairID, changes);
+		this._broadcastRefreshCoins(remains, changes);
 
 	} else {
 		// 要不起自动下一手
@@ -469,7 +472,8 @@ pro._resetRoomData = function () {
 
 // 结算金币
 pro._getSettlementCoins = function (winUser) {
-	let accounts = [];
+	let changes = [];
+	let remains = [];
 	let handCard = this.roomInfo.cardInfo.handCardData;
 	let underScore = stageCfg[this.roomInfo.gameType][this.roomInfo.stage].underScore;
 	let winCoins = 0;
@@ -478,12 +482,35 @@ pro._getSettlementCoins = function (winUser) {
 		let lessCoins = data.length * underScore;  // 扣币 = 牌张数 * 底分
 		let curCoins = this.roomInfo.players[i].coins;
 		lessCoins = ((lessCoins > curCoins) ? curCoins : lessCoins);
-		this.roomInfo.players[i].coins = this.roomInfo.players[i].coins - lessCoins;
+		this.roomInfo.players[i].coins = curCoins - lessCoins;
 		winCoins = winCoins + lessCoins;
-		accounts.push(-lessCoins);
+		changes.push(-lessCoins);
+		remains.push(this.roomInfo.players[i].coins);
 	}
-	accounts[winUser] = winCoins;
-	return accounts;
+	changes[winUser] = winCoins;
+	remains[winUser] = this.roomInfo.players[winUser].coins + winCoins;
+	return {changes: changes, remains: remains};
+};
+
+// 炸弹金币扣除
+pro._getBombCoins = function (wChairID, nums) {
+	let changes = [];
+	let remains = [];
+	for (const key in this.roomInfo.players) {
+		if (this.roomInfo.players.hasOwnProperty(key)) {
+			let user = this.roomInfo.players[key];
+			if (user.chairID == wChairID) {
+				this.roomInfo.players[key].coins = user.coins + nums;
+				changes.push(nums);
+			} else {
+				let remainNums = user.coins - nums
+				this.roomInfo.players[key].coins = (remainNums > 0) ? remainNums : 0;
+				changes.push(-nums);
+			}
+			remains.push(this.roomInfo.players[key].coins);
+		}
+	}
+	return {changes: changes, remains: remains};
 };
 
 // 要不起自动下手
@@ -564,13 +591,32 @@ pro._broadcastOutCardMsg = function (wChairID, bCardData, bCardCount, currentUse
 };
 
 // 推送结算消息
-pro._broadcastSettlementMsg = function (wChairID) {
-	let accountData = this._getSettlementCoins(wChairID);
+pro._broadcastSettlementMsg = function (wChairID, accountData) {
 	let route = 'onSettlement'
 	let msg = {
 		winUser: wChairID,
 		accountData: accountData,
 		handCardData: this.roomInfo.cardInfo.handCardData,
+	}
+	this._notifyMsgToOtherMem(null, route, msg);
+};
+
+// 广播金币变化
+pro._broadcastRefreshCoins = function (remains, changes) {
+	// 修改数据库金币数
+	for (const key in this.roomInfo.players) {
+		if (this.roomInfo.players.hasOwnProperty(key)) {
+			const user = this.roomInfo.players[key];
+			let preServerID = user.preSid;
+			let reaminCoins = remains[key];
+			pomelo.app.rpc.connector.entryRemote.onUpdateUsrCoins.toServer(preServerID, user.id, reaminCoins, null);
+		}
+	}
+
+	let route = 'onUpdateGoldCoins'
+	let msg = {
+		remains: remains,
+		changes: changes,
 	}
 	this._notifyMsgToOtherMem(null, route, msg);
 };

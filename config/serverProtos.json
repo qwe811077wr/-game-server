@@ -67,5 +67,14 @@
 
 	"onOutCardNotify": {
 		"required uInt32 currentUser": 1
+	},
+
+	"onRefreshUserCoins": {
+		"required uInt32 coins": 1
+	},
+
+	"onUpdateGoldCoins": {
+		"repeated uInt32 remains": 1,
+		"repeated uInt32 changes": 2
 	}
 }
