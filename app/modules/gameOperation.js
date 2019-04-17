@@ -68,6 +68,21 @@ Module.prototype.monitorHandler = function (agnet, msg, cb) {
 				entity.destroy();
 			}
 			utils.invokeCallback(cb, null);
+			break;
+		case 'props':
+			let avatar = entityMgr.getEntity(msg.id);
+			if (avatar) {
+				if (msg.proptype == 0) {
+					// 金币
+					let sum = avatar.coins + parseInt(msg.nums);
+					let num = sum > 0 ? sum : 0;
+					avatar.updataUserCoins(num);
+				} else {
+					logger.error('no exist propstype = ', msg.proptype);
+				}
+			}
+			utils.invokeCallback(cb, null);
+			break;
         default:
             logger.error('receive error signal: %j', msg);
     }
@@ -88,6 +103,9 @@ Module.prototype.clientHandler = function (agent, msg, cb) {
 			break;
 		case 'dissolve':
 			dissolveRoom(app, agent, msg, cb);
+			break;
+		case 'props':
+			sendProps(app, agent, msg, cb);
 			break;
         default:
             logger.error('game operation unknow signal: ' + msg.signal);
@@ -169,5 +187,20 @@ var dissolveRoom = function(app, agent, msg, cb) {
         });
     }else{
         cb(null,{body : 'finish.'});
+    }
+};
+
+var sendProps = function(app, agent, msg, cb) {
+	let connectorServers = app.getServersByType('connector');
+    let count = connectorServers.length;
+    let latch = countDownLatch.createCountDownLatch(count, {timeout: Constants.TIME.TIME_WAIT_COUNTDOWN}, function() {
+        utils.invokeCallback(cb, null);
+    });
+    let callback = function() {
+        latch.done();
+    };
+    for(let sid in connectorServers) {
+        let record = connectorServers[sid];
+        agent.request(record.id, module.exports.moduleId, msg, callback);
     }
 };

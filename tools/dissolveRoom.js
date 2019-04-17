@@ -14,7 +14,7 @@ function dissolveRoom(opts) {
                     console.error(err);
                 }
                 else {
-                    console.info("kick finish");
+                    console.info("dissolveRoom finish");
                 }
                 process.exit(0);
             })
