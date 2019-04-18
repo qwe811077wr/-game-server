@@ -35,6 +35,7 @@ pro.initGoldRoom = function (usrInfo, gameType, stage) {
 		status: consts.TableStatus.INIT,
 		gameType: gameType || consts.GameType.PDK_16,
 		stage: stage,
+		underScore: stageCfg[gameType][stage].underScore,
 		players: {},
 		//游戏开始卡牌信息
 		cardInfo:{
@@ -773,10 +774,13 @@ pro.leaveRoom = function (uid, next) {
 		let stage = this.roomInfo.stage;
 		let goldRoomId = this.roomInfo.roomid;
 		pomelo.app.rpc.matchGlobal.matchRemote.leaveGoldRoom(null, gameType, stage, goldRoomId, uid, function (resp) {
-			// 向其它人广播离开消息
-			let route = 'onLeaveRoom';
-			let msg = {wChairID: wChairID};
-			self._notifyMsgToOtherMem(null, route, msg);
+			let preServerID = user.preSid;
+			pomelo.app.rpc.connector.entryRemote.onLeaveGoldGame.toServer(preServerID, user.id, function (resp) {
+				// 向其它人广播离开消息
+				let route = 'onLeaveRoom';
+				let msg = {wChairID: wChairID};
+				self._notifyMsgToOtherMem(null, route, msg);
+			});
 		});
 
 	} else {
@@ -796,7 +800,7 @@ pro.destroy = function () {
 		if (players.hasOwnProperty(key)) {
 			const user = players[key];
 			let preServerID = user.preSid;
-			pomelo.app.rpc.connector.entryRemote.onGoldDissolveGame.toServer(preServerID, user.id, null);
+			pomelo.app.rpc.connector.entryRemote.onLeaveGoldGame.toServer(preServerID, user.id, null);
 		}
 	}
 
