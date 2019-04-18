@@ -201,15 +201,16 @@ pro.readyGame = function (uid, next) {
 	} else {
 		utils.invokeCallback(next, null, {code: consts.ReadyGameCode.OK});
 		this.setPlayerReadyState(uid, consts.ReadyState.Ready_Yes);
+		// 推送准备状态
+		let route = 'onReadyGame';
+		let msg = {wChairID: this._getChairIDByUid(uid)};
+		this._notifyMsgToOtherMem(null, route, msg);
 		let readyCount = this.getPlayerReadyCount();
 		if (readyCount >= 3) {
 			// 游戏开始
-			this._startGame();
-		} else{
-			// 推送准备状态
-			let route = 'onReadyGame';
-			let msg = {wChairID: this._getChairIDByUid(uid)};
-			this._notifyMsgToOtherMem(null, route, msg);
+			setTimeout(function () {
+				this._startGame();
+			}.bind(this), 1000);
 		}
 	}
 };
