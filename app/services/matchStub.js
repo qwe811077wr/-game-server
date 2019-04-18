@@ -103,10 +103,6 @@ pro.enterGoldRoom = function (gameType, stage, usrInfo, cb) {
 		toServerId = res.id;
 	}
 
-	if (common.isRobot(usrInfo.openid)) {
-		usrInfo.coins = this._getRobotRandCoins(gameType, stage);
-	}
-
 	pomelo.app.rpc.table.goldRemote.enterGoldRoom.toServer(toServerId, gameType, stage, usrInfo, function (resp) {
 		cb(resp);
 		if (resp.code == consts.RoomCode.OK) {
@@ -143,8 +139,10 @@ pro.joinGoldRoom = function (goldRoomId, userInfo, cb) {
 // 机器人添加进准备列表
 pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 	// 随机机器人属性
-	usrInfo.coins = this._getRobotRandCoins(gameType, stage);
-	logger.info('机器人随机金币数:', gameType, stage, usrInfo.coins);
+	if (!this._checkStageCoins(gameType, stage, usrInfo.coins)) {
+		usrInfo.coins = this._getRobotRandCoins(gameType, stage);
+	}
+
 	let robotArr = this.robotList[gameType][stage];
 	if (!this._updateUsrInfo(usrInfo, robotArr)) {
 		robotArr.push(usrInfo);
@@ -158,6 +156,21 @@ pro._getRobotRandCoins = function (gameType, stage) {
 	let lower = info.bArea;
 	let upper = (info.eArea < 0) ? lower*2 : info.eArea;
 	return Math.floor(Math.random() * (upper - lower)) + lower;
+};
+
+// 检测金币是否充足
+pro._checkStageCoins = function (gameType, stage, curCoins) {
+	let cfg = stageCfg[gameType][stage];
+	if (cfg.eArea < 0) {
+		if (curCoins >= cfg.bArea) {
+			return true;
+		}
+	} else {
+		if (curCoins >= cfg.bArea && curCoins <= cfg.eArea) {
+			return true;
+		}
+	}
+	return false;
 };
 
 // 更新玩家属性

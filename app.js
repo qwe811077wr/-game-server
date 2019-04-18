@@ -64,6 +64,7 @@ app.configure('production|development', 'gate', function () {
 app.configure('production|development', function () {
 	app.filter(pomelo.filters.timeout());  // 超时警告(beforeFilter->afterFilter),默认3s
 	app.before(pomelo.filters.toobusy());  // 请求等待队列过长，超过一个阀值时，就会触发
+	app.filter(pomelo.filters.serial());   // 对用户请求做串行化
 	app.enable('systemMonitor');
     if (typeof app.registerAdmin === 'function') {
         let onlineUser = _require('./app/modules/onlineUser');
@@ -103,7 +104,6 @@ app.configure('production|development', 'matchGlobal', function () {
 });
 
 app.configure('production|development', 'table', function () {
-	app.filter(pomelo.filters.serial()); // 对用户请求做串行化
     app.before(tableFilter());
 });
 
