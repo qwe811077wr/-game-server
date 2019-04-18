@@ -481,6 +481,13 @@ pro._getSettlementCoins = function (winUser) {
 	for (let i = 0; i < handCard.length; i++) {
 		let data = handCard[i] || [];
 		let lessCoins = data.length * underScore;  // 扣币 = 牌张数 * 底分
+		if (data.length == this.roomInfo.maxCardCount) {
+			// 春天翻倍
+			lessCoins = lessCoins * 2;
+		} else if (data.length == 1) {
+			// 报单不扣
+			lessCoins = 0;
+		}
 		let curCoins = this.roomInfo.players[i].coins;
 		lessCoins = ((lessCoins > curCoins) ? curCoins : lessCoins);
 		this.roomInfo.players[i].coins = curCoins - lessCoins;
@@ -782,7 +789,7 @@ pro.leaveRoom = function (uid, next) {
 				self._notifyMsgToOtherMem(null, route, msg);
 			});
 		});
-		
+
 	} else {
 		// 解散房间
 		this.destroy();
