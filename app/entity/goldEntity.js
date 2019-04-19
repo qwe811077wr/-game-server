@@ -208,9 +208,10 @@ pro.readyGame = function (uid, next) {
 		let readyCount = this.getPlayerReadyCount();
 		if (readyCount >= 3) {
 			// 游戏开始
+			this.roomInfo.status = consts.TableStatus.START;
 			setTimeout(function () {
 				this._startGame();
-			}.bind(this), 1000);
+			}.bind(this), 1500);
 		}
 	}
 };
@@ -248,7 +249,6 @@ pro.setPlayerReadyState = function (uid, state) {
 
 // 游戏开始
 pro._startGame = function () {
-	this.roomInfo.status = consts.TableStatus.START;
 	// 洗牌
 	let cardData = pdkHelper.RandCardList(this.roomInfo.gameType);
 
