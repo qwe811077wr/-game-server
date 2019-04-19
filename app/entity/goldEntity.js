@@ -211,7 +211,7 @@ pro.readyGame = function (uid, next) {
 			this.roomInfo.status = consts.TableStatus.START;
 			setTimeout(function () {
 				this._startGame();
-			}.bind(this), 1500);
+			}.bind(this), 1000);
 		}
 	}
 };
