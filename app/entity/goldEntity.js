@@ -777,18 +777,20 @@ pro.leaveRoom = function (uid, next) {
 	let self = this;
 	if (common.isRobot(user.openid)) {
 		// 离开房间
-		this.removeUserInPlayers(uid);
 		let preServerID = user.preSid;
 		pomelo.app.rpc.connector.entryRemote.onLeaveGoldGame.toServer(preServerID, user.id, function (resp) {
-			let gameType = self.roomInfo.gameType;
-			let stage = self.roomInfo.stage;
-			let goldRoomId = self.roomInfo.roomid;
-			pomelo.app.rpc.matchGlobal.matchRemote.leaveGoldRoom(null, gameType, stage, goldRoomId, uid, function (resp) {
-				// 向其它人广播离开消息
-				let route = 'onLeaveRoom';
-				let msg = {wChairID: wChairID};
-				self._notifyMsgToOtherMem(null, route, msg);
-			});
+			// 向其它人广播离开消息
+			let route = 'onLeaveRoom';
+			let msg = {wChairID: wChairID};
+			self._notifyMsgToOtherMem(null, route, msg);
+			self.removeUserInPlayers(uid);
+
+			setTimeout(function () {
+				let gameType = self.roomInfo.gameType;
+				let stage = self.roomInfo.stage;
+				let goldRoomId = self.roomInfo.roomid;
+				pomelo.app.rpc.matchGlobal.matchRemote.leaveGoldRoom(null, gameType, stage, goldRoomId, uid, null);
+			}, 2000);
 		});
 
 	} else {
