@@ -334,6 +334,8 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		let outCard = pdkAIHelper.AISearchOutCard(handCardData, turnCardData, bNextWarn);
 		if (!outCard) {
 			// 要不起
+			utils.invokeCallback(next, null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
+			this._broadcastHandCardMsg(wChairID);
 			return;
 		}
 		bCardData = outCard.bCardData;
@@ -341,6 +343,8 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 	}
 	this.logger.info(bCardData, bCardCount);
 	if (!bCardData) {
+		utils.invokeCallback(next, null, {code: consts.PlayCardCode.OUT_CARD_TYPE_ERROR});
+		this._broadcastHandCardMsg(wChairID);
 		return;
 	}
 	bCardData = bCardData.slice(0, bCardCount);
