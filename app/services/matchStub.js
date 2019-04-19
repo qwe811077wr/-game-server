@@ -146,7 +146,7 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 	let robotArr = this.robotList[gameType][stage];
 	if (!this._updateUsrInfo(usrInfo, robotArr)) {
 		robotArr.push(usrInfo);
-		logger.info('添加机器人进列表:', usrInfo);
+		logger.info('加入机器人进准备列表:', usrInfo);
 	}
 };
 
@@ -191,7 +191,7 @@ pro._spliceRobotToReadyList = function (gameType, stage) {
 	let robotArr = this.robotList[gameType][stage]
 	let robot = robotArr.splice(0, 1);
 	if (robot[0]) {
-		logger.info('自动分配机器人:', robot);
+		logger.info('分配机器人进入游戏:', robot);
 	}
 	return robot[0];
 };
@@ -264,6 +264,7 @@ pro._enterRoomCtr = function (usrInfo, roomInfo) {
 	
 	// 推送玩家加入信息
 	let user = this._getUserInfoByUid(usrInfo.id, roomInfo.players);
+	logger.info('onUserEntryRoom: ', user);
 	this._notifyMsgToAllUser(roomInfo.players, 'onUserEntryRoom', user);
 };
 
@@ -306,10 +307,10 @@ pro.leaveGoldRoom = function (gameType, stage, goldRoomId, uid, cb) {
 			const user = players[key];
 			if (uid == user.id) {
 				delete players[key];
+				logger.info('玩家离开:', user);
 				break;
 			}
 		}
 	}
-	logger.info('离开玩家与剩余玩家:',uid, players);
 	cb();
 };
