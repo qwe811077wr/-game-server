@@ -509,8 +509,8 @@ pro._getBombCoins = function (wChairID, nums) {
 		if (this.roomInfo.players.hasOwnProperty(key)) {
 			let user = this.roomInfo.players[key];
 			if (user.chairID == wChairID) {
-				this.roomInfo.players[key].coins = user.coins + nums;
-				changes.push(nums);
+				this.roomInfo.players[key].coins = user.coins + 2 * nums;
+				changes.push(2 * nums);
 			} else {
 				let remainNums = user.coins - nums
 				this.roomInfo.players[key].coins = (remainNums > 0) ? remainNums : 0;
