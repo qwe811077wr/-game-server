@@ -4,7 +4,7 @@ module.exports = {
 	[1]: [
 		{underScore: 50, bArea: 1000, eArea: -1, peopleNum: 100},
 		{underScore: 1000, bArea: 10000, eArea: -1, peopleNum: 100},
-		{underScore: 10000, bArea: 100000, eArea: -1, peopleNum: 100},
+		{underScore: 100000, bArea: 1000000, eArea: -1, peopleNum: 50},
 	],
 	
 	[2]: [

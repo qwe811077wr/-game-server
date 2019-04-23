@@ -154,7 +154,7 @@ pro._addRobotToReadyList = function (gameType, stage, usrInfo) {
 pro._getRobotRandCoins = function (gameType, stage) {
 	let info = stageCfg[gameType][stage];
 	let lower = info.bArea;
-	let upper = (info.eArea < 0) ? lower*10 : info.eArea;
+	let upper = (info.eArea < 0) ? lower*5 : info.eArea;
 	return Math.floor(Math.random() * (upper - lower)) + lower;
 };
 
