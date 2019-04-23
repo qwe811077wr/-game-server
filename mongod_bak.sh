@@ -8,7 +8,7 @@ TAR_DIR=/home/backup/mongod_bak/mongod_bak_list #备份存放路径
 
 DATE=`date +%Y_%m_%d` #获取当前系统时间
 
-DB_USER=username #数据库账号
+DB_USER=root #数据库账号
 
 DB_PASS=123456 #数据库密码
 
