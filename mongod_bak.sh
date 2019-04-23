@@ -22,7 +22,7 @@ rm -rf $OUT_DIR/*
 
 mkdir -p $OUT_DIR/$DATE
 
-$DUMP -u $DB_USER -p $DB_PASS -o $OUT_DIR/$DATE #备份全部数据库
+$DUMP -u $DB_USER -p $DB_PASS -o $OUT_DIR/$DATE --authenticationDatabase admin #备份全部数据库
 
 tar -zcvf $TAR_DIR/$TAR_BAK $OUT_DIR/$DATE #压缩为.tar.gz格式
 
