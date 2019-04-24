@@ -501,7 +501,8 @@ pro._getSettlementCoins = function (winUser) {
 		remains.push(this.roomInfo.players[i].coins);
 	}
 	changes[winUser] = winCoins;
-	remains[winUser] = this.roomInfo.players[winUser].coins + winCoins;
+	this.roomInfo.players[winUser].coins = this.roomInfo.players[winUser].coins + winCoins;
+	remains[winUser] = this.roomInfo.players[winUser].coins;
 	return {changes: changes, remains: remains};
 };
 
