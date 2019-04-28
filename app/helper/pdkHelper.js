@@ -43,6 +43,7 @@ exp.CardType = {
 // 最大手牌数
 var MaxCardCount = 16;
 
+//******************************************************************************* */
 
 //混乱扑克
 exp.RandCardList = function (gameType)
@@ -66,6 +67,33 @@ exp.RandCardList = function (gameType)
 	}
 	return cbCardData;
 }
+
+// 控制随机次数
+exp.RandCardListEx = function (gameType) {
+	if (gameType == consts.GameType.PDK_15) {
+		var cbCardData = Data_15.slice(0);
+		MaxCardCount = 15;
+	} else {
+		var cbCardData = Data_16.slice(0);
+		MaxCardCount = 16;
+	}
+
+	let lower = 1;
+	let upper = cbCardData.length;
+	let randCount = Math.floor(Math.random() * (upper - lower)) + lower;
+	for (let i = 0; i < randCount; i++) {
+		let index1 = Math.floor(Math.random() * 10000) % cbCardData.length;
+		let index2 = Math.floor(Math.random() * 10000) % cbCardData.length;
+		let temp;
+		temp = cbCardData[index1];
+		cbCardData[index1] = cbCardData[index2];
+		cbCardData[index2] = temp;
+	}
+	return cbCardData;
+}
+
+
+//******************************************************************************* */
 
 //排列扑克
 exp.SortCardList = function(cbCardData, cbCardCount)

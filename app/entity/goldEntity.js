@@ -250,7 +250,7 @@ pro.setPlayerReadyState = function (uid, state) {
 // 游戏开始
 pro._startGame = function () {
 	// 洗牌
-	let cardData = pdkHelper.RandCardList(this.roomInfo.gameType);
+	let cardData = pdkHelper.RandCardListEx(this.roomInfo.gameType);
 
 	// 配牌
 	// cardData = [
@@ -259,19 +259,38 @@ pro._startGame = function () {
 	// 	1, 13, 58, 42, 25, 24, 8, 55, 23, 7, 38, 22, 5, 19, 3,
 	// ];
 
-	// 发牌、排序
-	var handCardData = [];
-	var pos = 0
+	// 发牌
+	// var handCardData = [];
+	// var pos = 0
+	// for (let i = 0; i < 3; i++) {
+	// 	let onearr = cardData.slice(pos, pos + this.roomInfo.maxCardCount);
+	// 	handCardData.push(onearr);
+	// 	pos = pos + this.roomInfo.maxCardCount;
+	// 	pdkHelper.SortCardList(handCardData[i], this.roomInfo.maxCardCount);
+	// 	this.roomInfo.cardInfo.handCardData[i] = onearr;
+	// 	this.roomInfo.cardInfo.cardCount[i] = this.roomInfo.maxCardCount;
+	// }
+	// this.logger.info('玩家手牌数据:', handCardData);
+
+	// 发牌扩展(好配几率更高)
+	let handCardData = [[],[],[]];
+	let curIdx = Math.floor(Math.random() * 3);
+	let step = 5;
+	if (this.roomInfo.maxCardCount % 5 != 0) {
+		step = 4;
+	}
+	for (let i = 0; i < cardData.length; i+=step) {
+		curIdx = (curIdx+1) % 3;
+		let onearr = cardData.slice(i, i + step);
+		handCardData[curIdx] = handCardData[curIdx].concat(onearr);
+	}
 	for (let i = 0; i < 3; i++) {
-		let carditem = cardData.slice(pos, pos + this.roomInfo.maxCardCount);
-		handCardData.push(carditem);
-		pos = pos + this.roomInfo.maxCardCount;
 		pdkHelper.SortCardList(handCardData[i], this.roomInfo.maxCardCount);
-		this.roomInfo.cardInfo.handCardData[i] = carditem;
+		this.roomInfo.cardInfo.handCardData[i] = handCardData[i];
 		this.roomInfo.cardInfo.cardCount[i] = this.roomInfo.maxCardCount;
 	}
 	this.logger.info('玩家手牌数据:', handCardData);
-
+	
     // 黑桃3先出
     var banker = this._getBankerUser(handCardData, 3);
     this.roomInfo.cardInfo.currentUser = banker;
