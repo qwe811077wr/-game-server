@@ -79,7 +79,7 @@ exp.RandCardListEx = function (gameType) {
 	}
 
 	let lower = 1;
-	let upper = cbCardData.length;
+	let upper = 10;//cbCardData.length;
 	let randCount = Math.floor(Math.random() * (upper - lower)) + lower;
 	for (let i = 0; i < randCount; i++) {
 		let index1 = Math.floor(Math.random() * 10000) % cbCardData.length;
