@@ -45,7 +45,7 @@ var MaxCardCount = 16;
 
 //******************************************************************************* */
 
-//混乱扑克
+// 完全打乱
 exp.RandCardList = function (gameType)
 {
 	if (gameType == consts.GameType.PDK_15) {
@@ -68,8 +68,46 @@ exp.RandCardList = function (gameType)
 	return cbCardData;
 }
 
-// 控制随机次数
-exp.RandCardListEx = function (gameType) {
+// 模拟真实打牌
+exp.RandCardList2 = function (gameType) {
+	if (gameType == consts.GameType.PDK_15) {
+		var cbCardData = Data_15.slice(0);
+		MaxCardCount = 15;
+	} else {
+		var cbCardData = Data_16.slice(0);
+		MaxCardCount = 16;
+	}
+
+	// 洗牌
+	let lower = 1;
+	let upper = cbCardData.length;
+	let randCount = Math.floor(Math.random() * (upper - lower)) + lower;
+	for (let i = 0; i < randCount; i++) {
+		let index1 = Math.floor(Math.random() * 10000) % cbCardData.length;
+		let index2 = Math.floor(Math.random() * 10000) % cbCardData.length;
+		let temp;
+		temp = cbCardData[index1];
+		cbCardData[index1] = cbCardData[index2];
+		cbCardData[index2] = temp;
+	}
+
+	// 发牌
+	let step = 5;
+	if (MaxCardCount % 5 != 0) {
+		step = 4;
+	}
+	let curIdx = Math.floor(Math.random() * 3);
+	let handCardData = [[],[],[]];
+	for (let i = 0; i < cbCardData.length; i+=step) {
+		curIdx = (curIdx+1) % 3;
+		let onearr = cbCardData.slice(i, i + step);
+		handCardData[curIdx] = handCardData[curIdx].concat(onearr);
+	}
+	return handCardData;
+};
+
+// 刺激场
+exp.RandCardList3 = function (gameType) {
 	if (gameType == consts.GameType.PDK_15) {
 		var cbCardData = Data_15.slice(0);
 		MaxCardCount = 15;
@@ -79,7 +117,7 @@ exp.RandCardListEx = function (gameType) {
 	}
 
 	let lower = 1;
-	let upper = 10;//cbCardData.length;
+	let upper = 5;
 	let randCount = Math.floor(Math.random() * (upper - lower)) + lower;
 	for (let i = 0; i < randCount; i++) {
 		let index1 = Math.floor(Math.random() * 10000) % cbCardData.length;
@@ -90,8 +128,7 @@ exp.RandCardListEx = function (gameType) {
 		cbCardData[index2] = temp;
 	}
 	return cbCardData;
-}
-
+};
 
 //******************************************************************************* */
 
