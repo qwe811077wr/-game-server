@@ -159,7 +159,25 @@ exp.RandCardList3 = function (gameType) {
 		cbCardData[index1] = cbCardData[index2];
 		cbCardData[index2] = temp;
 	}
-	return cbCardData;
+
+	// 发牌
+	let step = 5;
+	if (MaxCardCount % 5 != 0) {
+		step = 4;
+	}
+	let curIdx = Math.floor(Math.random() * 3);
+	let handCardData = [[],[],[]];
+	for (let i = 0; i < cbCardData.length; i+=step) {
+		curIdx = (curIdx+1) % 3;
+		let onearr = cbCardData.slice(i, i + step);
+		handCardData[curIdx] = handCardData[curIdx].concat(onearr);
+	}
+
+	let tempData = [];
+	for (let i = 0; i < 3; i++) {
+		tempData = tempData.concat(handCardData[i]);
+	}
+	return tempData;
 };
 
 //******************************************************************************* */
