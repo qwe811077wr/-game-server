@@ -540,6 +540,16 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 			// 闹钟提示
 			this._broadcastOutCardNotify(this.roomInfo.cardInfo.currentUser);
 			this._startAutoSchedule();
+
+			// 最后一手自动出牌
+			let handCardData = this.roomInfo.cardInfo.handCardData[wChairID];
+			let turnCardData = this.roomInfo.cardInfo.turnCardData;
+			let bNextWarn = this.roomInfo.cardInfo.bUserWarn[(wChairID+1)%3];
+			let outCard = pdkAIHelper.AISearchOutCard(handCardData, turnCardData, bNextWarn);
+			if (outCard && outCard.bCardCount == handCardData.length) {
+				this.playCard();
+			}
+
 		}.bind(this), 1.5 * 1000);
 		return;
 	}

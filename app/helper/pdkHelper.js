@@ -149,7 +149,7 @@ exp.RandCardList3 = function (gameType) {
 	}
 
 	let lower = 1;
-	let upper = 5;
+	let upper = 10;
 	let randCount = Math.floor(Math.random() * (upper - lower)) + lower;
 	for (let i = 0; i < randCount; i++) {
 		let index1 = Math.floor(Math.random() * 10000) % cbCardData.length;
