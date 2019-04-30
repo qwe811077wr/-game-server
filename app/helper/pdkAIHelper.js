@@ -153,8 +153,8 @@ pro.AISearchOutCard = function(handCardData, turnCardData, bNextWarn){
 						//炸弹不能拆
 						let isBomb = false;
 						let outvalue = pdkHelper.GetCardLogicValue(OutCardResult.cbResultCard[0]);
-						for (let i = 0; i < AnalyseResult.cbFourCount; i+=4) {
-							let value = pdkHelper.GetCardLogicValue(AnalyseResult.cbFourCardData[i]);
+						for (let i = 0; i < AnalyseResult.cbFourCount; i++) {
+							let value = pdkHelper.GetCardLogicValue(AnalyseResult.cbFourCardData[i*4]);
 							if (outvalue == value) {
 								isBomb = true;
 							}
@@ -313,10 +313,18 @@ pro.AISearchOutCard = function(handCardData, turnCardData, bNextWarn){
 			{    //****************如果把炸弹拆了，强制出炸弹***********************
 				for(let i=0;i<OutCardResult.cbCardCount;i++)
 				{
-					if (pdkHelper.GetCardLogicValue(OutCardResult.cbResultCard[i])
-						==pdkHelper.GetCardLogicValue(AnalyseResult.cbFourCardData[0]))
+					let isBomb = false;
+					let outvalue = pdkHelper.GetCardLogicValue(OutCardResult.cbResultCard[i]);
+					for (let i = 0; i < AnalyseResult.cbFourCount; i++) {
+						let value = pdkHelper.GetCardLogicValue(AnalyseResult.cbFourCardData[i*4]);
+						if (outvalue == value) {
+							isBomb = true;
+						}
+					}
+
+					if (isBomb)
 					{
-						OutCard.bCardData = AnalyseResult.cbFourCardData.slice(0);
+						OutCard.bCardData = AnalyseResult.cbFourCardData.slice(AnalyseResult.cbFourCount*4-4, AnalyseResult.cbFourCount*4);
 						OutCard.bCardCount = 4;
 						// m_pIAndroidUserItem->SendSocketData(REC_SUB_C_OUT_CART,&OutCard,sizeof(OutCard));
 						return OutCard;
