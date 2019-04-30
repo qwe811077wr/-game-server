@@ -543,8 +543,8 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 
 			// 最后一手自动出牌
 			let handCardData = this.roomInfo.cardInfo.handCardData[wChairID];
-			let turnCardData = this.roomInfo.cardInfo.turnCardData;
-			let bNextWarn = this.roomInfo.cardInfo.bUserWarn[(wChairID+1)%3];
+			let turnCardData = [];
+			let bNextWarn = false;
 			let outCard = pdkAIHelper.AISearchOutCard(handCardData, turnCardData, bNextWarn);
 			if (outCard && outCard.bCardCount == handCardData.length) {
 				this.playCard();
