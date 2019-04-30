@@ -585,14 +585,14 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 			this._startAutoSchedule();
 
 			// 最后一手自动出牌
-			// let currentUser = this.roomInfo.cardInfo.currentUser;
-			// let handCardData = this.roomInfo.cardInfo.handCardData[currentUser];
-			// let turnCardData = this.roomInfo.cardInfo.turnCardData;
-			// let bNextWarn = this.roomInfo.cardInfo.bUserWarn[(currentUser+1)%playerCount];
-			// let outCard = pdkAIHelper.AISearchOutCard(handCardData, turnCardData, bNextWarn);
-			// if (outCard && outCard.bCardCount == handCardData.length) {
-			// 	this.playCard();
-			// }
+			let currentUser = this.roomInfo.cardInfo.currentUser;
+			let handCardData = this.roomInfo.cardInfo.handCardData[currentUser];
+			let turnCardData = this.roomInfo.cardInfo.turnCardData;
+			let bNextWarn = this.roomInfo.cardInfo.bUserWarn[(currentUser+1)%playerCount];
+			let outCard = pdkAIHelper.AISearchOutCard(handCardData, turnCardData, bNextWarn);
+			if (outCard && outCard.bCardCount == handCardData.length) {
+				this.playCard();
+			}
 		}.bind(this), 1.5 * 1000);
 	}
 };
