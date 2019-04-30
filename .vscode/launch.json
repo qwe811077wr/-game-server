@@ -8,10 +8,10 @@
 			"type": "node",
 			"request": "attach",
 			"name": "Remote",
-			"address": "127.0.0.1",
+			"address": "47.99.50.101",
 			"port": 10006,
-			"localRoot": "",  //"${workspaceFolder}",
-			//"remoteRoot": "/home/kzyx/game-server"
+			"localRoot": "${workspaceFolder}",
+			"remoteRoot": "/home/kzyx/game-server"
 		},
         {
             "type": "node",

@@ -259,11 +259,11 @@ pro._startGame = function () {
 	}
 
 	// 配牌
-	cardData = [
-		60, 44, 28, 59, 43, 9, 56, 24, 53, 21, 5, 52, 36, 20, 3,
-		2, 1, 45, 29, 13, 26, 10, 57, 41, 25, 40, 38, 6, 37, 35,
-		12, 27, 11, 58, 42, 8, 55, 39, 23, 7, 54, 22, 4, 51, 19,
-	];
+	// cardData = [
+	// 	60, 44, 28, 59, 43, 9, 56, 24, 53, 21, 5, 52, 36, 20, 3,
+	// 	2, 1, 45, 29, 13, 26, 10, 57, 41, 25, 40, 38, 6, 37, 35,
+	// 	12, 27, 11, 58, 42, 8, 55, 39, 23, 7, 54, 22, 4, 51, 19,
+	// ];
 
 	//发牌
 	var handCardData = [];
@@ -585,9 +585,10 @@ pro._checkNextOutCard = function (wChairID, nextChariID) {
 			this._startAutoSchedule();
 
 			// 最后一手自动出牌
-			let handCardData = this.roomInfo.cardInfo.handCardData[wChairID];
+			let currentUser = this.roomInfo.cardInfo.currentUser;
+			let handCardData = this.roomInfo.cardInfo.handCardData[currentUser];
 			let turnCardData = this.roomInfo.cardInfo.turnCardData;
-			let bNextWarn = this.roomInfo.cardInfo.bUserWarn[(wChairID+1)%playerCount];
+			let bNextWarn = this.roomInfo.cardInfo.bUserWarn[(currentUser+1)%playerCount];
 			let outCard = pdkAIHelper.AISearchOutCard(handCardData, turnCardData, bNextWarn);
 			if (outCard && outCard.bCardCount == handCardData.length) {
 				this.playCard();

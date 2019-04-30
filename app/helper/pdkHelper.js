@@ -724,7 +724,7 @@ exp.CompareLastCard = function(cbFirstCard, cbNextCard, cbFirstCount, cbNextCoun
 	//规则判断
 	//if(cbFirstType!=cbNextType) return false;
 	//if ((cbFirstCount!=cbNextCount)&&(cbNextType!=CT_THREE_LINE_TAKE_TWO)) return false;
-	if ((cbFirstType!=cbNextType)||(cbFirstCount!=cbNextCount)) return false;
+	if ((cbFirstType!=cbNextType)) return false;
 
 	//开始对比
 	switch (cbNextType)
