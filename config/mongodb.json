@@ -4,8 +4,6 @@
 		"port": "27017",
 		"database": "mango_test",
 		"options": {
-			"user": "root",
-			"pass": "123456",
 			"poolSize": 5
 		}
 	},
