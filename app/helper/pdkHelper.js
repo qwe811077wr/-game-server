@@ -96,7 +96,7 @@ exp.RandCardList2 = function (gameType) {
 	if (MaxCardCount % 5 != 0) {
 		step = 4;
 	}
-	let curIdx = Math.floor(Math.random() * 3);
+	let curIdx = Math.floor(Math.random() * 10000) % 3;
 	let handCardData = [[],[],[]];
 	for (let i = 0; i < cbCardData.length; i+=step) {
 		curIdx = (curIdx+1) % 3;
@@ -165,7 +165,7 @@ exp.RandCardList3 = function (gameType) {
 	if (MaxCardCount % 5 != 0) {
 		step = 4;
 	}
-	let curIdx = Math.floor(Math.random() * 3);
+	let curIdx = Math.floor(Math.random() * 10000) % 3;
 	let handCardData = [[],[],[]];
 	for (let i = 0; i < cbCardData.length; i+=step) {
 		curIdx = (curIdx+1) % 3;
