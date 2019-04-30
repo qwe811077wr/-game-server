@@ -1016,7 +1016,7 @@ exp.SearchOutCard = function(cbHandCardData, cbHandCardCount, cbTurnCardData, cb
 	case exp.CardType.CT_THREE_LINE_TAKE_TWO:	//三带一对
 		{
 			//长度判断
-			if (cbCardCount<cbTurnCardCount) break;
+			//if (cbCardCount<cbTurnCardCount) break;
 
 			//获取数值
 			let cbLogicValue=0;
