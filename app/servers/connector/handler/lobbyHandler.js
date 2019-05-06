@@ -21,3 +21,7 @@ handler.createRoom = function (msg, session, next) {
 handler.joinRoom = function (msg, session, next) {
 	session.avatar.lobby.joinRoom(msg.roomid, next);
 };
+
+handler.getUserBaseInfo = function (msg, session, next) {
+	session.avatar.lobby.getUserBaseInfo(next);
+};

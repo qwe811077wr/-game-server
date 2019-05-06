@@ -101,3 +101,12 @@ pro._notifyJoinRoomToOtherMem = function (uid, players, route, msg) {
         messageService.pushMessageByUids(uids, route, msg);
     }
 };
+
+// 获取用户基础信息
+pro.getUserBaseInfo = function (next) {
+	let usrInfo = this.entity.clientLoginInfo();
+	next(null, {
+		code: consts.Code.OK,
+		info: usrInfo
+	});
+};

@@ -462,6 +462,7 @@ pro.playCard = function(uid, bCardData, bCardCount, next) {
 		let remains = settleData.remains;
 		this._broadcastSettlementMsg(wChairID, changes);
 		this._broadcastRefreshCoins(remains, changes);
+		this._updateWinOrFailCount(this.roomInfo.players[wChairID].id);
 
 	} else {
 		// 要不起自动下一手
@@ -658,6 +659,18 @@ pro._broadcastRefreshCoins = function (remains, changes) {
 		changes: changes,
 	}
 	this._notifyMsgToOtherMem(null, route, msg);
+};
+
+// 更新胜率
+pro._updateWinOrFailCount = function (winerId) {
+	for (const key in this.roomInfo.players) {
+		if (this.roomInfo.players.hasOwnProperty(key)) {
+			const user = this.roomInfo.players[key];
+			let preServerID = user.preSid;
+			let isWiner = (user.id == winerId) ? true: false;
+			pomelo.app.rpc.connector.entryRemote.onUpdateUsrWinOrFailCount.toServer(preServerID, user.id, isWiner, null);
+		}
+	}
 };
 
 // 推送要不起消息

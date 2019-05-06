@@ -69,6 +69,14 @@ pro.updataUserCoins = function (coins) {
 	this.logger.info('update user coins num = %d', this.coins);
 };
 
+pro.updateUserWinOrFailCount = function (isWiner) {
+	if (isWiner) {
+		this.winCount = this.winCount + 1;
+	} else {
+		this.failCount = this.failCount + 1;
+	}
+};
+
 // 离线所得金币
 pro._getCoinsByOffline = function () {
 	if (true) {
@@ -125,7 +133,9 @@ pro.clientLoginInfo = function () {
         offlineCoins: this.offlineCoins,
 		gems: this.gems,
 		roomid: this.roomid,
-        goldRoomId: this.goldRoomId,
+		goldRoomId: this.goldRoomId,
+		winCount: this.winCount,
+		failCount:  this.failCount,
     }
 };
 

@@ -12,7 +12,9 @@ var AvatarSchema = new Schema({
     gems: Number,
 	roomid: Number,
     goldRoomId: String,
-    lastOfflineTime: Number,
+	lastOfflineTime: Number,
+	winCount: Number,
+	failCount: Number,
 });
 
 AvatarSchema.set('toObject', { getters: true });

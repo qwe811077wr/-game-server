@@ -13,7 +13,9 @@ let persistProperties = {
 	gems: 0,  // 元宝
 	roomid: 0, //房间ID
     goldRoomId: "0", // 金币场房间ID
-    lastOfflineTime: 0,  //上次下线时间
+	lastOfflineTime: 0,  //上次下线时间
+	winCount: 0, //赢的次数
+	failCount: 0, //输的次数
 };
 
 module.exports = {

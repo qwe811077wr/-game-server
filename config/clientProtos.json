@@ -25,6 +25,9 @@
 		"required uInt32 roomid": 1
 	},
 
+	"connector.lobbyHandler.getUserBaseInfo": {
+	},
+
 	"connector.matchHandler.getMatchInfo": {
 		"required uInt32 gameType": 1
 	},

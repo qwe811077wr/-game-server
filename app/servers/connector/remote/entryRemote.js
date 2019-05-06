@@ -73,3 +73,10 @@ pro.onUpdateUsrCoins = function (avtID, coins, cb) {
     avatar.updataUserCoins(coins);
     cb();
 };
+
+// 结算更新玩家输赢次数
+pro.onUpdateUsrWinOrFailCount = function (avtID, isWiner) {
+	var avatar = entityManager.getEntity(avtID);
+    avatar.updateUserWinOrFailCount(isWiner);
+    cb();
+};
